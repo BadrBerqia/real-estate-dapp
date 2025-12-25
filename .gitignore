@@ -1,0 +1,12 @@
+# --- Terraform & Secrets ---
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+*.json
+*.key
+*.pem
+
+# --- IDE ---
+.vscode/
+.idea/
