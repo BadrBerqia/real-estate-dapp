@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+// Force rebuild v2
+
 interface Property {
   id: number;
   title: string;
