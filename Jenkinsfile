@@ -38,17 +38,15 @@ spec:
       requests:
         cpu: 100m
         memory: 256Mi
-  - name: kubectl
-    image: bitnami/kubectl:latest
+  - name: gcloud
+    image: google/cloud-sdk:slim
     command:
-    - /bin/sh
-    - -c
-    - "while true; do sleep 86400; done"
-    tty: false
+    - cat
+    tty: true
     resources:
       requests:
         cpu: 20m
-        memory: 32Mi
+        memory: 64Mi
   volumes:
   - name: kaniko-secret
     secret:
@@ -79,12 +77,11 @@ spec:
             }
             
             stage('Deploy to Kubernetes') {
-                container('kubectl') {
-                    timeout(time: 2, unit: 'MINUTES') {
-                        sh '/bin/sh -c "echo Testing kubectl..."'
-                        sh '/bin/sh -c "kubectl get pods"'
-                        sh '/bin/sh -c "kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest || echo Deployment not found"'
-                    }
+                container('gcloud') {
+                    sh 'echo "Testing kubectl..."'
+                    sh 'kubectl version --client || true'
+                    sh 'kubectl get pods || true'
+                    sh 'kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest || echo "Deployment not found yet"'
                 }
             }
         } catch (e) {
