@@ -6,6 +6,7 @@ metadata:
   labels:
     some-label: some-value
 spec:
+  serviceAccountName: jenkins
   containers:
   - name: jnlp
     image: jenkins/inbound-agent:latest
@@ -77,10 +78,8 @@ spec:
             
             stage('Deploy to Kubernetes') {
                 container('kubectl') {
-                    withCredentials([file(credentialsId: 'kubeconfig-credentials-id', variable: 'KUBECONFIG')]) {
-                        sh 'kubectl get pods'
-                        sh 'kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest'
-                    }
+                    sh 'kubectl get pods'
+                    sh 'kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest || echo "Deployment not found yet, skipping update"'
                 }
             }
         } catch (e) {
