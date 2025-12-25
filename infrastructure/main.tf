@@ -16,20 +16,15 @@ resource "google_container_node_pool" "primary_nodes" {
   name       = "spot-node-pool"
   location   = var.zone
   cluster    = google_container_cluster.primary.name
-  node_count = 1  # Un seul serveur pour commencer
+  node_count = 1
 
   node_config {
-    #preemptible  = true  # OBSOLÈTE mais souvent utilisé, voir 'spot' ci-dessous
-    spot         = true  # CRUCIAL: Active les instances "Spot" (-80% du prix)
+    spot         = true
     
-    # e2-medium (2 vCPU, 4GB RAM) est le minimum vital pour Spring Boot + Angular
-    # Grâce au mode Spot, ça coûtera très peu cher (quelques centimes/heure)
-    machine_type = "e2-medium"
-
-    # Réduire la taille du disque (Standard est 100GB -> on met 20GB pour économiser)
+    machine_type = "e2-standard-2"  # <-- CHANGEMENT ICI (était e2-medium)
+    
     disk_size_gb = 20
-    disk_type    = "pd-standard" # Disque dur standard (moins cher que SSD)
-
+    disk_type    = "pd-standard"
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]

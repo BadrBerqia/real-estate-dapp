@@ -23,6 +23,15 @@ spec:
       requests:
         cpu: 150m
         memory: 300Mi
+  - name: node
+    image: node:18-alpine
+    command:
+    - cat
+    tty: true
+    resources:
+      requests:
+        cpu: 150m
+        memory: 512Mi
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
     command:
@@ -59,13 +68,14 @@ spec:
                 checkout scm
             }
             
-            stage('Build Maven') {
+            // ==================== BACKEND ====================
+            stage('Build Backend') {
                 container('maven') {
                     sh 'cd backend && mvn clean package -DskipTests -T 1C'
                 }
             }
             
-            stage('Build & Push Image') {
+            stage('Push Backend Image') {
                 container('kaniko') {
                     sh '''
                     /kaniko/executor \
@@ -76,12 +86,33 @@ spec:
                 }
             }
             
+            // ==================== FRONTEND ====================
+            stage('Build Frontend') {
+                container('node') {
+                    sh '''
+                    cd frontend
+                    npm install
+                    npm run build --prod
+                    '''
+                }
+            }
+            
+            stage('Push Frontend Image') {
+                container('kaniko') {
+                    sh '''
+                    /kaniko/executor \
+                    --context `pwd`/frontend \
+                    --dockerfile `pwd`/frontend/Dockerfile \
+                    --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/frontend:latest
+                    '''
+                }
+            }
+            
+            // ==================== DEPLOY ====================
             stage('Deploy to Kubernetes') {
                 container('gcloud') {
-                    sh 'echo "Testing kubectl..."'
-                    sh 'kubectl version --client'
-                    sh 'kubectl get pods'
-                    sh 'kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest || echo "Deployment not found yet"'
+                    sh 'kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest || echo "Backend deployment not found"'
+                    sh 'kubectl set image deployment/real-estate-frontend frontend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/frontend:latest || echo "Frontend deployment not found"'
                 }
             }
         } catch (e) {
