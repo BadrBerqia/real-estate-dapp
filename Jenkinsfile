@@ -8,14 +8,18 @@ metadata:
     some-label: some-value
 spec:
   containers:
-  # 1. Maven container for building the JAR
+  # 1. Maven : On limite le CPU pour éviter l'erreur "Insufficient cpu"
   - name: maven
     image: maven:3.8-eclipse-temurin-17
     command:
     - cat
     tty: true
-    
-  # 2. Kaniko container for building/pushing Docker image
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+
+  # 2. Kaniko : On limite aussi le CPU
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
     command:
@@ -24,18 +28,26 @@ spec:
     volumeMounts:
       - name: kaniko-secret
         mountPath: /secret
-        
-  # 3. [NEW] Kubectl container for deployment (Fix for 'kubectl: not found')
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+
+  # 3. Kubectl : Très léger, on demande le minimum
   - name: kubectl
     image: bitnami/kubectl:latest
     command:
     - cat
     tty: true
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
 
   volumes:
   - name: kaniko-secret
     secret:
-      secretName: gcp-service-account-key # Ensure this secret exists in your K8s
+      secretName: gcp-service-account-key
 """
 ) {
     node(label) {
@@ -46,15 +58,12 @@ spec:
 
             stage('Build Maven') {
                 container('maven') {
-                    // Builds the JAR file visible in your logs
                     sh 'mvn clean package -DskipTests'
                 }
             }
 
             stage('Build & Push Image') {
                 container('kaniko') {
-                    // Uses the Kaniko arguments seen in your logs
-                    // Ensure your Dockerfile copies the JAR from the build context
                     sh '''
                     /kaniko/executor \
                     --context `pwd` \
@@ -65,19 +74,14 @@ spec:
             }
 
             stage('Deploy to Kubernetes') {
-                // [NEW] Run these commands inside the kubectl container
                 container('kubectl') {
+                    // ATTENTION : Vérifie que l'ID 'kubeconfig-credentials-id' correspond bien à tes identifiants Jenkins
                     withCredentials([file(credentialsId: 'kubeconfig-credentials-id', variable: 'KUBECONFIG')]) {
                         sh 'echo Test de connexion...'
-                        
-                        // This should now work
                         sh 'kubectl get pods'
                         
-                        // Actual deployment command (Example update)
+                        // Commande de déploiement
                         sh 'kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest'
-                        
-                        // Or if you use a yaml file:
-                        // sh 'kubectl apply -f k8s/deployment.yaml'
                     }
                 }
             }
