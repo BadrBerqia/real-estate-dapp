@@ -3,10 +3,19 @@
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
-*.json
+infrastructure/*.json
 *.key
 *.pem
 
 # --- IDE ---
 .vscode/
 .idea/
+
+# --- Node ---
+node_modules/
+dist/
+
+# --- Java ---
+target/
+*.jar
+!backend/target/*.jar.original
