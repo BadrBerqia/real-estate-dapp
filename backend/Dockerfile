@@ -1,26 +1,14 @@
-# --- Stage 1 : Build (Compilation avec Maven) ---
-# On utilise une image Maven avec Java 17 (OpenJDK) comme demandé 
+# Étape 1 : Construction (Build)
 FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
-
-# On copie d'abord le pom.xml pour profiter du cache Docker (télécharge les dépendances une seule fois)
 COPY pom.xml .
-# (Note: Cette étape échouera tant que ton collègue n'a pas mis son pom.xml, c'est normal pour l'instant)
-# COPY src ./src
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# On compile le projet et on crée le JAR
-# RUN mvn clean package -DskipTests
-
-# --- Stage 2 : Run (Exécution) ---
-# Image légère juste pour lancer Java 17
-FROM openjdk:17-jdk-slim
+# Étape 2 : Exécution (Run)
+# On remplace l'ancienne image invalide par celle-ci :
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-
-# On copie le JAR généré depuis l'étape de build
-# COPY --from=build /app/target/*.jar app.jar
-
-# Port standard Spring Boot
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-
-# Commande de lancement
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
