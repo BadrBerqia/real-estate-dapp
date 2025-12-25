@@ -8,7 +8,15 @@ metadata:
     some-label: some-value
 spec:
   containers:
-  # 1. Maven : On limite le CPU pour éviter l'erreur "Insufficient cpu"
+  # 1. JNLP (L'agent Jenkins lui-même) - On le force à être petit
+  - name: jnlp
+    image: jenkins/inbound-agent:latest
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+
+  # 2. Maven - Minimum vital pour compiler
   - name: maven
     image: maven:3.8-eclipse-temurin-17
     command:
@@ -16,10 +24,10 @@ spec:
     tty: true
     resources:
       requests:
-        cpu: 250m
-        memory: 512Mi
+        cpu: 150m     # Réduit de 250m à 150m
+        memory: 300Mi # Réduit de 512Mi à 300Mi
 
-  # 2. Kaniko : On limite aussi le CPU
+  # 3. Kaniko - Minimum vital pour construire l'image
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
     command:
@@ -30,10 +38,10 @@ spec:
         mountPath: /secret
     resources:
       requests:
-        cpu: 250m
-        memory: 512Mi
+        cpu: 100m     # Réduit drastiquement
+        memory: 256Mi # Réduit drastiquement
 
-  # 3. Kubectl : Très léger, on demande le minimum
+  # 4. Kubectl - Presque rien
   - name: kubectl
     image: bitnami/kubectl:latest
     command:
@@ -41,8 +49,8 @@ spec:
     tty: true
     resources:
       requests:
-        cpu: 50m
-        memory: 64Mi
+        cpu: 20m
+        memory: 32Mi
 
   volumes:
   - name: kaniko-secret
@@ -58,7 +66,8 @@ spec:
 
             stage('Build Maven') {
                 container('maven') {
-                    sh 'mvn clean package -DskipTests'
+                    // On ajoute -T 1C pour dire à Maven d'y aller doucement sur le CPU
+                    sh 'mvn clean package -DskipTests -T 1C'
                 }
             }
 
@@ -75,12 +84,9 @@ spec:
 
             stage('Deploy to Kubernetes') {
                 container('kubectl') {
-                    // ATTENTION : Vérifie que l'ID 'kubeconfig-credentials-id' correspond bien à tes identifiants Jenkins
                     withCredentials([file(credentialsId: 'kubeconfig-credentials-id', variable: 'KUBECONFIG')]) {
                         sh 'echo Test de connexion...'
                         sh 'kubectl get pods'
-                        
-                        // Commande de déploiement
                         sh 'kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest'
                     }
                 }
