@@ -15,6 +15,6 @@ public class RealEstateApplication {
 
     @GetMapping("/")
     public String hello() {
-        return "Hello from Google Cloud Kubernetes!";
+        return "Hello World!";
     }
 }
