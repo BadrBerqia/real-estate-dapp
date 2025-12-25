@@ -6,11 +6,17 @@ apiVersion: v1
 kind: Pod
 metadata:
   labels:
-    app: kaniko
+    app: jenkins-agent
 spec:
+  serviceAccountName: default
   containers:
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
+    command:
+    - cat
+    tty: true
+  - name: kubectl
+    image: bitnami/kubectl:latest
     command:
     - cat
     tty: true
@@ -19,7 +25,6 @@ spec:
     }
 
     environment {
-        // TES INFOS GOOGLE CLOUD
         PROJECT_ID = 'real-estate-dapp-jee'
         REGION = 'us-central1'
         REPO_NAME = 'jee-repo'
@@ -29,15 +34,13 @@ spec:
     stages {
         stage('Checkout Code') {
             steps {
-                // Récupérer le code depuis GitHub
                 checkout scm
             }
         }
 
-        stage('Build & Push Backend') {
+        stage('Build & Push Docker') {
             steps {
                 container('kaniko') {
-                    // On utilise la clé gcp-key pour se connecter
                     withCredentials([file(credentialsId: 'gcp-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                         sh """
                         /kaniko/executor --context `pwd`/backend \
@@ -46,6 +49,16 @@ spec:
                         --force
                         """
                     }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                container('kubectl') {
+                    // Applique la configuration et force la mise à jour
+                    sh 'kubectl apply -f k8s/backend.yaml'
+                    sh 'kubectl rollout restart deployment/real-estate-backend'
                 }
             }
         }
