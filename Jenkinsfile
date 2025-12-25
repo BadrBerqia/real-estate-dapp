@@ -39,7 +39,7 @@ spec:
         cpu: 100m
         memory: 256Mi
   - name: gcloud
-    image: google/cloud-sdk:slim
+    image: google/cloud-sdk:latest
     command:
     - cat
     tty: true
@@ -79,8 +79,8 @@ spec:
             stage('Deploy to Kubernetes') {
                 container('gcloud') {
                     sh 'echo "Testing kubectl..."'
-                    sh 'kubectl version --client || true'
-                    sh 'kubectl get pods || true'
+                    sh 'kubectl version --client'
+                    sh 'kubectl get pods'
                     sh 'kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest || echo "Deployment not found yet"'
                 }
             }
