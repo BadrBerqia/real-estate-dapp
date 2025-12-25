@@ -41,8 +41,10 @@ spec:
   - name: kubectl
     image: bitnami/kubectl:latest
     command:
-    - cat
-    tty: true
+    - /bin/sh
+    - -c
+    - "while true; do sleep 86400; done"
+    tty: false
     resources:
       requests:
         cpu: 20m
@@ -78,8 +80,11 @@ spec:
             
             stage('Deploy to Kubernetes') {
                 container('kubectl') {
-                    sh 'kubectl get pods'
-                    sh 'kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest || echo "Deployment not found yet, skipping update"'
+                    timeout(time: 2, unit: 'MINUTES') {
+                        sh '/bin/sh -c "echo Testing kubectl..."'
+                        sh '/bin/sh -c "kubectl get pods"'
+                        sh '/bin/sh -c "kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest || echo Deployment not found"'
+                    }
                 }
             }
         } catch (e) {
