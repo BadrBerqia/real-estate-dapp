@@ -16,7 +16,7 @@ spec:
     - cat
     tty: true
   - name: kubectl
-    image: bitnami/kubectl:latest
+    image: google/cloud-sdk:slim
     command:
     - cat
     tty: true
@@ -56,7 +56,11 @@ spec:
         stage('Deploy to Kubernetes') {
             steps {
                 container('kubectl') {
-                    // Applique la configuration et force la mise à jour
+                    // Test de connexion avant de déployer
+                    sh 'echo "Test de connexion..."'
+                    sh 'kubectl get pods' 
+                    
+                    // Le vrai déploiement
                     sh 'kubectl apply -f k8s/backend.yaml'
                     sh 'kubectl rollout restart deployment/real-estate-backend'
                 }
