@@ -1,70 +1,90 @@
-pipeline {
-    agent {
-        kubernetes {
-            yaml """
+def label = "worker-${UUID.randomUUID().toString()}"
+
+podTemplate(label: label, yaml: """
 apiVersion: v1
 kind: Pod
 metadata:
   labels:
-    app: jenkins-agent
+    some-label: some-value
 spec:
-  serviceAccountName: default
   containers:
+  # 1. Maven container for building the JAR
+  - name: maven
+    image: maven:3.8-eclipse-temurin-17
+    command:
+    - cat
+    tty: true
+    
+  # 2. Kaniko container for building/pushing Docker image
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
     command:
-    - cat
+    - /busybox/cat
     tty: true
+    volumeMounts:
+      - name: kaniko-secret
+        mountPath: /secret
+        
+  # 3. [NEW] Kubectl container for deployment (Fix for 'kubectl: not found')
   - name: kubectl
-    image: google/cloud-sdk:slim
+    image: bitnami/kubectl:latest
     command:
     - cat
     tty: true
+
+  volumes:
+  - name: kaniko-secret
+    secret:
+      secretName: gcp-service-account-key # Ensure this secret exists in your K8s
 """
-        }
-    }
-
-    environment {
-        PROJECT_ID = 'real-estate-dapp-jee'
-        REGION = 'us-central1'
-        REPO_NAME = 'jee-repo'
-        IMAGE_NAME = 'backend' 
-    }
-
-    stages {
-        stage('Checkout Code') {
-            steps {
+) {
+    node(label) {
+        try {
+            stage('Checkout') {
                 checkout scm
             }
-        }
 
-        stage('Build & Push Docker') {
-            steps {
+            stage('Build Maven') {
+                container('maven') {
+                    // Builds the JAR file visible in your logs
+                    sh 'mvn clean package -DskipTests'
+                }
+            }
+
+            stage('Build & Push Image') {
                 container('kaniko') {
-                    withCredentials([file(credentialsId: 'gcp-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                        sh """
-                        /kaniko/executor --context `pwd`/backend \
-                        --dockerfile `pwd`/backend/Dockerfile \
-                        --destination us-central1-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:latest \
-                        --force
-                        """
+                    // Uses the Kaniko arguments seen in your logs
+                    // Ensure your Dockerfile copies the JAR from the build context
+                    sh '''
+                    /kaniko/executor \
+                    --context `pwd` \
+                    --dockerfile ./Dockerfile \
+                    --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest
+                    '''
+                }
+            }
+
+            stage('Deploy to Kubernetes') {
+                // [NEW] Run these commands inside the kubectl container
+                container('kubectl') {
+                    withCredentials([file(credentialsId: 'kubeconfig-credentials-id', variable: 'KUBECONFIG')]) {
+                        sh 'echo Test de connexion...'
+                        
+                        // This should now work
+                        sh 'kubectl get pods'
+                        
+                        // Actual deployment command (Example update)
+                        sh 'kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest'
+                        
+                        // Or if you use a yaml file:
+                        // sh 'kubectl apply -f k8s/deployment.yaml'
                     }
                 }
             }
-        }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                container('kubectl') {
-                    // Test de connexion avant de déployer
-                    sh 'echo "Test de connexion..."'
-                    sh 'kubectl get pods' 
-                    
-                    // Le vrai déploiement
-                    sh 'kubectl apply -f k8s/backend.yaml'
-                    sh 'kubectl rollout restart deployment/real-estate-backend'
-                }
-            }
+        } catch (e) {
+            currentBuild.result = 'FAILURE'
+            throw e
         }
     }
 }
