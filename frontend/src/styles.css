@@ -1,23 +1,6 @@
-/* ========== FORCE DARK BACKGROUND ========== */
-html, body, app-root, router-outlet, main, .container, .container-fluid, .main-container {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
-  min-height: 100vh;
-}
+/* ========== GLOBAL ========== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-body {
-  background-attachment: fixed !important;
-}
-
-/* Override any white backgrounds */
-div, section, article, aside {
-  background-color: transparent !important;
-}
-
-.card, .property-card, .mat-card, [class*="card"] {
-  background: rgba(255, 255, 255, 0.05) !important;
-}
-
-/* ========== GLOBAL RESET & BASE ========== */
 * {
   margin: 0;
   padding: 0;
@@ -25,67 +8,43 @@ div, section, article, aside {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', sans-serif;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background-attachment: fixed;
   min-height: 100vh;
   color: #e2e8f0;
 }
 
 /* ========== NAVBAR ========== */
-nav, .navbar, header {
-  background: rgba(26, 26, 46, 0.95) !important;
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1rem 2rem;
+.navbar {
+  background: #1a1a2e !important;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-.navbar-brand, nav a, header a {
+.navbar-brand {
   color: #fff !important;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .nav-link {
   color: #94a3b8 !important;
-  transition: color 0.3s;
-  padding: 0.5rem 1rem !important;
-  border-radius: 8px;
 }
 
 .nav-link:hover, .nav-link.active {
-  color: #fff !important;
-  background: rgba(16, 185, 129, 0.2);
+  color: #10b981 !important;
 }
 
 /* ========== BUTTONS ========== */
-button, .btn {
-  border: none;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn-primary, button[color="primary"], .btn-connect {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-  color: white !important;
+.btn-primary {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
   border: none !important;
-}
-
-.btn-primary:hover, button[color="primary"]:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
-}
-
-.btn-secondary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
   color: white !important;
+  border-radius: 10px !important;
 }
 
 .btn-outline-primary {
-  border: 2px solid #10b981 !important;
+  border-color: #10b981 !important;
   color: #10b981 !important;
-  background: transparent !important;
 }
 
 .btn-outline-primary:hover {
@@ -94,167 +53,63 @@ button, .btn {
 }
 
 /* ========== CARDS ========== */
-.card, .property-card, .mat-card {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 16px !important;
-  overflow: hidden;
-  transition: transform 0.3s, box-shadow 0.3s;
+.card {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 12px !important;
 }
 
-.card:hover, .property-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-.card-title, .card h3, .card h4 {
+.card-title {
   color: #fff !important;
-  font-weight: 600;
 }
 
-.card-text, .card p {
+.card-text {
   color: #94a3b8 !important;
 }
 
-.card-body {
-  padding: 1.5rem !important;
-}
-
-/* ========== TYPOGRAPHY ========== */
+/* ========== HEADINGS ========== */
 h1, h2, h3, h4, h5, h6 {
-  color: #fff;
-  font-weight: 700;
-}
-
-h1 {
-  font-size: 2.5rem;
-  background: linear-gradient(135deg, #fff 0%, #10b981 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-p, span, label {
-  color: #94a3b8;
-}
-
-a {
   color: #10b981;
-  text-decoration: none;
 }
 
-a:hover {
-  color: #34d399;
-}
-
-/* ========== FORMS ========== */
-input, select, textarea, .form-control {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 8px !important;
-  color: #fff !important;
-  padding: 12px 16px !important;
-}
-
-input:focus, select:focus, textarea:focus, .form-control:focus {
-  outline: none;
-  border-color: #10b981 !important;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
-}
-
-input::placeholder {
-  color: #64748b !important;
-}
-
-label {
-  color: #e2e8f0 !important;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-/* ========== ALERTS & BADGES ========== */
-.alert {
-  border-radius: 12px !important;
-  border: none !important;
-}
-
+/* ========== ALERTS ========== */
 .alert-warning {
   background: rgba(245, 158, 11, 0.2) !important;
+  border: none !important;
   color: #fbbf24 !important;
 }
 
-.alert-success {
-  background: rgba(16, 185, 129, 0.2) !important;
-  color: #10b981 !important;
+/* ========== FORMS ========== */
+.form-control {
+  background: rgba(255,255,255,0.1) !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  color: #fff !important;
 }
 
-.alert-danger {
-  background: rgba(239, 68, 68, 0.2) !important;
-  color: #f87171 !important;
-}
-
-.badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-weight: 500;
-}
-
-/* ========== PRICE STYLING ========== */
-.price, .eth-price, [class*="price"] {
-  color: #10b981 !important;
-  font-weight: 700;
-  font-size: 1.25rem;
-}
-
-/* ========== CONTAINERS ========== */
-.container, .container-fluid {
-  padding: 2rem;
-}
-
-main, .main-content {
-  min-height: calc(100vh - 140px);
-  padding: 2rem 0;
+.form-control:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 2px rgba(16,185,129,0.2) !important;
 }
 
 /* ========== TABLES ========== */
-table {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  overflow: hidden;
+.table {
+  color: #e2e8f0;
 }
 
-th {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: #fff !important;
-  font-weight: 600;
-  padding: 1rem !important;
+.table th {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
 }
 
-td {
-  color: #e2e8f0 !important;
-  padding: 1rem !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* ========== EMPTY STATE ========== */
-.empty-state, .no-data {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #64748b;
-}
-
-/* ========== FOOTER ========== */
-footer {
-  background: rgba(26, 26, 46, 0.95);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 2rem;
-  text-align: center;
-  color: #64748b;
-}
-
-/* ========== METAMASK BUTTON ========== */
-[class*="metamask"], [class*="connect"], [class*="wallet"] {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+/* ========== PRICE ========== */
+.text-success, .price {
+  color: #10b981 !important;
+  font-weight: 700;
 }
 
 /* ========== SCROLLBAR ========== */
@@ -269,40 +124,4 @@ footer {
 ::-webkit-scrollbar-thumb {
   background: #10b981;
   border-radius: 4px;
-}
-
-/* ========== TABS ========== */
-.nav-tabs {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-  background: rgba(26, 26, 46, 0.8);
-}
-
-.nav-tabs .nav-link {
-  border: none !important;
-  color: #94a3b8 !important;
-}
-
-.nav-tabs .nav-link.active {
-  background: rgba(16, 185, 129, 0.2) !important;
-  color: #10b981 !important;
-  border-radius: 8px 8px 0 0;
-}
-
-/* ========== IMAGES ========== */
-.property-image, .card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-
-/* ========== GRID ========== */
-.properties-grid, .row {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
-}
-
-/* ========== LOADING ========== */
-.spinner, .loading {
-  color: #10b981;
 }
