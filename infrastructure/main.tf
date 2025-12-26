@@ -23,7 +23,7 @@ resource "google_container_node_pool" "primary_nodes" {
     
     machine_type = "e2-standard-2"  # <-- CHANGEMENT ICI (était e2-medium)
     
-    disk_size_gb = 20
+    disk_size_gb = 50
     disk_type    = "pd-standard"
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
