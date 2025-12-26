@@ -2,9 +2,6 @@ def label = "worker-${UUID.randomUUID().toString()}"
 podTemplate(label: label, yaml: """
 apiVersion: v1
 kind: Pod
-metadata:
-  labels:
-    some-label: some-value
 spec:
   serviceAccountName: jenkins
   containers:
@@ -30,8 +27,8 @@ spec:
     tty: true
     resources:
       requests:
-        cpu: 150m
-        memory: 512Mi
+        cpu: 100m
+        memory: 256Mi
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
     command:
@@ -63,31 +60,34 @@ spec:
 """
 ) {
     node(label) {
-        try {
-            stage('Checkout') {
-                checkout scm
+        def hasAngular = false
+        
+        stage('Checkout') {
+            checkout scm
+            hasAngular = fileExists('frontend/package.json')
+        }
+        
+        // ==================== BACKEND ====================
+        stage('Build Backend') {
+            container('maven') {
+                sh 'cd backend && mvn clean package -DskipTests -T 1C'
             }
-            
-            // ==================== BACKEND ====================
-            stage('Build Backend') {
-                container('maven') {
-                    sh 'cd backend && mvn clean package -DskipTests -T 1C'
-                }
+        }
+        
+        stage('Push Backend Image') {
+            container('kaniko') {
+                sh '''
+                /kaniko/executor \
+                --context `pwd`/backend \
+                --dockerfile `pwd`/backend/Dockerfile \
+                --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest
+                '''
             }
-            
-            stage('Push Backend Image') {
-                container('kaniko') {
-                    sh '''
-                    /kaniko/executor \
-                    --context `pwd`/backend \
-                    --dockerfile `pwd`/backend/Dockerfile \
-                    --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest
-                    '''
-                }
-            }
-            
-            // ==================== FRONTEND ====================
-            stage('Build Frontend') {
+        }
+        
+        // ==================== FRONTEND ====================
+        if (hasAngular) {
+            stage('Build Frontend (Angular)') {
                 container('node') {
                     sh '''
                     cd frontend
@@ -96,28 +96,29 @@ spec:
                     '''
                 }
             }
-            
-            stage('Push Frontend Image') {
-                container('kaniko') {
-                    sh '''
-                    /kaniko/executor \
-                    --context `pwd`/frontend \
-                    --dockerfile `pwd`/frontend/Dockerfile \
-                    --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/frontend:latest
-                    '''
-                }
+        } else {
+            stage('Frontend (Static)') {
+                echo 'Static HTML frontend - no build needed'
             }
-            
-            // ==================== DEPLOY ====================
-            stage('Deploy to Kubernetes') {
-                container('gcloud') {
-                    sh 'kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest || echo "Backend deployment not found"'
-                    sh 'kubectl set image deployment/real-estate-frontend frontend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/frontend:latest || echo "Frontend deployment not found"'
-                }
+        }
+        
+        stage('Push Frontend Image') {
+            container('kaniko') {
+                sh '''
+                /kaniko/executor \
+                --context `pwd`/frontend \
+                --dockerfile `pwd`/frontend/Dockerfile \
+                --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/frontend:latest
+                '''
             }
-        } catch (e) {
-            currentBuild.result = 'FAILURE'
-            throw e
+        }
+        
+        // ==================== DEPLOY ====================
+        stage('Deploy to Kubernetes') {
+            container('gcloud') {
+                sh 'kubectl set image deployment/real-estate-backend backend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/backend:latest'
+                sh 'kubectl set image deployment/real-estate-frontend frontend=us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/frontend:latest'
+            }
         }
     }
 }
