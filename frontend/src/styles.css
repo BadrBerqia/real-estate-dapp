@@ -1,3 +1,22 @@
+/* ========== FORCE DARK BACKGROUND ========== */
+html, body, app-root, router-outlet, main, .container, .container-fluid, .main-container {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+  min-height: 100vh;
+}
+
+body {
+  background-attachment: fixed !important;
+}
+
+/* Override any white backgrounds */
+div, section, article, aside {
+  background-color: transparent !important;
+}
+
+.card, .property-card, .mat-card, [class*="card"] {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
 /* ========== GLOBAL RESET & BASE ========== */
 * {
   margin: 0;
