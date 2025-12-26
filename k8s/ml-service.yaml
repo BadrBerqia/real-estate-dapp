@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ml-service
+  template:
+    metadata:
+      labels:
+        app: ml-service
+    spec:
+      containers:
+      - name: ml-service
+        image: us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/ml-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ml-service
+spec:
+  type: ClusterIP
+  selector:
+    app: ml-service
+  ports:
+  - port: 80
+    targetPort: 8000
+```
+
+---
+
+## Structure finale
+```
+ml-service/
+├── Dockerfile
+├── requirements.txt
+└── app/
+    ├── main.py         # Placeholder (ton collègue complète)
+    └── models/         # Dossier pour les .pkl
