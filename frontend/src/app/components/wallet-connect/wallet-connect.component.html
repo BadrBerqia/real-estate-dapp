@@ -1,0 +1,24 @@
+<div class="wallet-connect">
+  <button 
+    *ngIf="!connectedAccount" 
+    (click)="connectWallet()" 
+    class="connect-btn"
+    [disabled]="connecting"
+  >
+    {{ connecting ? 'Connexion...' : '🔗 Connecter MetaMask' }}
+  </button>
+  
+  <div *ngIf="connectedAccount" class="account-info">
+    <div class="network-status" [class.correct]="isCorrectNetwork" [class.wrong]="!isCorrectNetwork">
+      {{ isCorrectNetwork ? '🟢 Sepolia' : '🔴 Mauvais réseau' }}
+    </div>
+    <span class="account-address">
+      {{ connectedAccount | slice:0:6 }}...{{ connectedAccount | slice:-4 }}
+    </span>
+    <span class="balance">Balance: {{ balance }} ETH</span>
+    
+    <button *ngIf="!isCorrectNetwork" class="btn-warning" (click)="switchToSepolia()">
+      🔄 Passer à Sepolia
+    </button>
+  </div>
+</div>

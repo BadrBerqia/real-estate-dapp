@@ -1,0 +1,16 @@
+<div class="profile">
+  <h2>Mon Profil</h2>
+  <div *ngIf="account" class="profile-info">
+    <div class="info-item">
+      <span class="label">Adresse:</span>
+      <span class="value">{{ account }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Balance:</span>
+      <span class="value">{{ balance }} ETH</span>
+    </div>
+  </div>
+  <div *ngIf="!account" class="no-account">
+    <p>Veuillez connecter votre wallet pour voir votre profil</p>
+  </div>
+</div>

@@ -1,0 +1,160 @@
+<div class="my-properties">
+  <!-- En-tête avec statistiques -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-group">
+        <h1>🏠 Mes Propriétés</h1>
+        <p class="subtitle">Gérez toutes vos propriétés en location</p>
+      </div>
+      <button class="btn btn-primary" (click)="router.navigate(['/list-property'])">
+        <span class="btn-icon">+</span>
+        Lister une Nouvelle Propriété
+      </button>
+    </div>
+
+    <!-- Cartes de statistiques -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <span class="stat-number">{{ properties.length }}</span>
+          <span class="stat-label">Propriété(s)</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+          <span class="stat-number">{{ getAvailablePropertiesCount() }}</span>
+          <span class="stat-label">Disponible(s)</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-content">
+          <span class="stat-number">{{ getOccupiedPropertiesCount() }}</span>
+          <span class="stat-label">Occupée(s)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- État de chargement -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Chargement de vos propriétés...</p>
+  </div>
+
+  <!-- État vide -->
+  <div *ngIf="properties.length === 0 && !loading" class="empty-state">
+    <div class="empty-content">
+      <div class="empty-icon">🏡</div>
+      <h3>Aucune propriété trouvée</h3>
+      <p>Vous n'avez pas encore listé de propriétés sur la plateforme.</p>
+      <button class="btn btn-primary" (click)="router.navigate(['/list-property'])">
+        🚀 Lister votre première propriété
+      </button>
+    </div>
+  </div>
+
+  <!-- Grille des propriétés -->
+  <div *ngIf="properties.length > 0 && !loading" class="properties-container">
+    <!-- Barre d'outils -->
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" placeholder="🔍 Rechercher une propriété..." 
+               (input)="onSearch($event)">
+      </div>
+      <div class="filter-controls">
+        <select (change)="onStatusFilter($event)" class="filter-select">
+          <option value="all">Tous les statuts</option>
+          <option value="available">Disponibles</option>
+          <option value="occupied">Occupées</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Grille des propriétés -->
+    <div class="properties-grid">
+      <div *ngFor="let property of filteredProperties" 
+           class="property-card" 
+           [class.featured]="property.isAvailable">
+        
+        <!-- Image et badge de statut -->
+        <div class="property-image">
+          <img [src]="getPropertyImage(property.id)" [alt]="property.title" 
+               (error)="handleImageError($event)">
+          <div class="image-overlay">
+            <div class="status-badge" [class]="getStatusClass(property)">
+              {{ property.isAvailable ? '✅ Disponible' : '⏳ Occupée' }}
+            </div>
+            <div class="action-buttons">
+              <button class="btn-icon" (click)="viewProperty(property.id)" title="Voir détails">
+                👁️
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informations de la propriété -->
+        <div class="property-content">
+          <div class="property-header">
+            <h3 class="property-title">{{ property.title }}</h3>
+            <div class="property-id">#{{ property.id }}</div>
+          </div>
+          
+          <p class="property-location">📍 {{ property.location }}</p>
+          <p class="property-description" *ngIf="property.description">
+            {{ truncateDescription(property.description) }}
+          </p>
+
+          <!-- Détails financiers -->
+          <div class="financial-details">
+            <div class="price-section">
+              <div class="price-item">
+                <span class="price-label">Prix/jour</span>
+                <span class="price-value">{{ property.pricePerDay }} ETH</span>
+              </div>
+              <div class="price-item">
+                <span class="price-label">Dépôt</span>
+                <span class="price-value">{{ property.deposit }} ETH</span>
+              </div>
+            </div>
+            <div class="total-price">
+              <span class="total-label">Total par location</span>
+              <span class="total-value">{{ property.pricePerDay + property.deposit }} ETH</span>
+            </div>
+          </div>
+
+          <!-- Métriques -->
+          <div class="property-metrics">
+            <div class="metric">
+              <span class="metric-icon">📅</span>
+              <span class="metric-text">{{ property.rentalIds?.length || 0 }} location(s)</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="property-actions">
+            <button class="btn btn-outline" (click)="viewProperty(property.id)">
+              👀 Voir Détails
+            </button>
+            <button *ngIf="property.isAvailable" 
+                    class="btn btn-secondary"
+                    (click)="editProperty(property.id)">
+              ✏️ Modifier
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="properties.length > 6">
+      <button class="pagination-btn" [disabled]="currentPage === 1" 
+              (click)="previousPage()">← Précédent</button>
+      <span class="pagination-info">Page {{ currentPage }} sur {{ totalPages }}</span>
+      <button class="pagination-btn" [disabled]="currentPage === totalPages" 
+              (click)="nextPage()">Suivant →</button>
+    </div>
+  </div>
+</div>

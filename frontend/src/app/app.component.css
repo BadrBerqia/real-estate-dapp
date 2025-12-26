@@ -1,0 +1,84 @@
+.app-container {
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.app-header {
+  background: #2c3e50;
+  color: white;
+  padding: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.app-header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.app-nav {
+  background: #34495e;
+  padding: 0;
+}
+
+.app-nav .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.app-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.app-nav li {
+  margin: 0;
+}
+
+.app-nav a {
+  color: white;
+  text-decoration: none;
+  padding: 1rem 1.5rem;
+  display: block;
+  transition: background 0.2s;
+  border-right: 1px solid #4a6278;
+}
+
+.app-nav a:hover,
+.app-nav a.active {
+  background: #3498db;
+}
+
+.app-nav li:last-child a {
+  border-right: none;
+}
+
+.app-main {
+  padding: 2rem 0;
+  background: #f8f9fa;
+  min-height: calc(100vh - 120px);
+}
+
+.app-main .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}

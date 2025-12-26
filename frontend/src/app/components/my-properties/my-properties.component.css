@@ -1,0 +1,555 @@
+/* my-properties.component.css */
+.my-properties {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 80vh;
+}
+
+/* Section d'en-tête */
+.header-section {
+  margin-bottom: 3rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+}
+
+.title-group h1 {
+  color: #1a365d;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  color: #718096;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+/* Cartes de statistiques */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.5rem;
+  border-radius: 16px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* États de chargement et vide */
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4299e1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.empty-content {
+  max-width: 400px;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.7;
+}
+
+.empty-state h3 {
+  color: #2d3748;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.empty-state p {
+  color: #718096;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+/* Barre d'outils */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.search-box {
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.filter-select {
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Grille des propriétés */
+.properties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.property-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #f1f3f4;
+  position: relative;
+}
+
+.property-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.property-card.featured {
+  border: 2px solid #48bb78;
+}
+
+/* Image de la propriété */
+.property-image {
+  position: relative;
+  height: 250px;
+  overflow: hidden;
+}
+
+.property-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.property-card:hover .property-image img {
+  transform: scale(1.05);
+}
+
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.7));
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.property-card:hover .image-overlay {
+  opacity: 1;
+}
+
+.status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.available {
+  background: #48bb78;
+  color: white;
+}
+
+.status-badge.occupied {
+  background: #ed8936;
+  color: white;
+}
+
+.btn-icon {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+/* Contenu de la carte */
+.property-content {
+  padding: 1.5rem;
+}
+
+.property-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.property-title {
+  color: #2d3748;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.property-id {
+  color: #a0aec0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.property-location {
+  color: #718096;
+  margin: 0 0 1rem 0;
+  font-size: 0.95rem;
+}
+
+.property-description {
+  color: #4a5568;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+/* Détails financiers */
+.financial-details {
+  background: #f7fafc;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.price-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.price-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-label {
+  font-size: 0.8rem;
+  color: #718096;
+  margin-bottom: 0.25rem;
+}
+
+.price-value {
+  font-weight: 700;
+  color: #2d3748;
+  font-size: 1.1rem;
+}
+
+.total-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 2px solid #e2e8f0;
+}
+
+.total-label {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.total-value {
+  font-weight: 800;
+  color: #4299e1;
+  font-size: 1.2rem;
+}
+
+/* Métriques */
+.property-metrics {
+  margin-bottom: 1.5rem;
+}
+
+.metric {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+/* Actions */
+.property-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4299e1, #3182ce);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3182ce, #2c5aa0);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(49, 130, 206, 0.3);
+}
+
+.btn-secondary {
+  background: #edf2f7;
+  color: #4a5568;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #4299e1;
+  border: 2px solid #4299e1;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: #4299e1;
+  color: white;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pagination-btn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: #4299e1;
+  background: #4299e1;
+  color: white;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  color: #718096;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .my-properties {
+    padding: 1rem;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .title-group h1 {
+    font-size: 2rem;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+
+  .properties-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    flex-direction: column;
+  }
+
+  .search-box {
+    max-width: none;
+  }
+
+  .price-section {
+    grid-template-columns: 1fr;
+  }
+
+  .property-actions {
+    flex-direction: column;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .property-content {
+    padding: 1rem;
+  }
+
+  .property-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .financial-details {
+    padding: 0.75rem;
+  }
+}
+
+/* Animations */
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --card-hue {
+  syntax: "<number>";
+  initial-value: 0;
+  inherits: false;
+}
+
+.property-card {
+  animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

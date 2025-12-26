@@ -1,0 +1,35 @@
+.profile {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.profile-info {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.label {
+  font-weight: bold;
+  color: #666;
+}
+
+.value {
+  font-family: monospace;
+}
+
+.no-account {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}

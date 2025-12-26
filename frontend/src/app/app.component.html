@@ -1,0 +1,27 @@
+<div class="app-container">
+  <header class="app-header">
+    <div class="container">
+      <h1>🏠 RealEstate Rental dApp</h1>
+      <app-wallet-connect></app-wallet-connect>
+    </div>
+  </header>
+
+  <nav class="app-nav">
+    <div class="container">
+      <ul>
+        <li><a routerLink="/properties" routerLinkActive="active">📋 Propriétés</a></li>
+        <li><a routerLink="/properties/map" routerLinkActive="active">🗺️ Carte</a></li>
+        <li><a routerLink="/my-properties" routerLinkActive="active">👤 Mes Propriétés</a></li>
+        <li><a routerLink="/my-rentals" routerLinkActive="active">📅 Mes Locations</a></li>
+        <li><a routerLink="/list-property" routerLinkActive="active">➕ Lister</a></li>
+        <li><a routerLink="/profile" routerLinkActive="active">👤 Profil</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="app-main">
+    <div class="container">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

@@ -1,0 +1,131 @@
+<div class="property-detail" *ngIf="property">
+  <div class="back-nav">
+    <button class="btn btn-secondary" (click)="goBack()">← Retour aux propriétés</button>
+  </div>
+
+  <div class="property-header">
+    <h1>{{ property.title }}</h1>
+    <p class="location">📍 {{ property.location }}</p>
+  </div>
+
+  <div class="property-content">
+    <!-- Image de la propriété -->
+    <div class="property-images">
+      <img [src]="getPropertyImage(property.id)" [alt]="property.title" class="main-image">
+    </div>
+
+    <div class="property-info">
+      <!-- Description -->
+      <div class="description-section">
+        <h3>Description</h3>
+        <p>{{ property.description || 'Aucune description disponible' }}</p>
+      </div>
+
+      <!-- Détails de la propriété -->
+      <div class="details-section">
+        <h3>Détails</h3>
+        <div class="detail-item">
+          <span class="label">Prix par jour:</span>
+          <span class="value">{{ property.pricePerDay }} ETH</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Dépôt de garantie:</span>
+          <span class="value">{{ property.deposit }} ETH</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Propriétaire:</span>
+          <span class="value">{{ formatAddress(property.owner) }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Statut:</span>
+          <span class="value" [class.available]="property.isAvailable" 
+                [class.unavailable]="!property.isAvailable">
+            {{ property.isAvailable ? '✅ Disponible' : '❌ Occupée' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Formulaire de location -->
+      <div class="rental-form" *ngIf="property.isAvailable && isConnected">
+        <h3>📅 Réserver cette propriété</h3>
+        
+        <form (ngSubmit)="onRentSubmit()" #rentalForm="ngForm">
+          <div class="form-group">
+            <label for="startDate">Date d'arrivée *</label>
+            <input type="date" id="startDate" 
+                   [(ngModel)]="rentalData.startDate" 
+                   name="startDate" 
+                   required 
+                   [min]="getMinStartDate()"
+                   (change)="calculateTotal()"
+                   class="form-control">
+            <small>À partir de demain</small>
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">Date de départ *</label>
+            <input type="date" id="endDate" 
+                   [(ngModel)]="rentalData.endDate" 
+                   name="endDate" 
+                   required 
+                   [min]="getMinEndDate()"
+                   (change)="calculateTotal()"
+                   class="form-control">
+            <small>Au moins 1 nuit</small>
+          </div>
+
+          <!-- Calcul du prix -->
+          <div class="price-calculation" *ngIf="rentalData.totalPrice > 0">
+            <h4>💰 Détail du prix</h4>
+            <div class="calculation-item">
+              <span>Prix du séjour ({{ calculateDays() }} jours):</span>
+              <span>{{ rentalData.totalPrice }} ETH</span>
+            </div>
+            <div class="calculation-item">
+              <span>Dépôt de garantie:</span>
+              <span>{{ property.deposit }} ETH</span>
+            </div>
+            <div class="calculation-item total">
+              <span><strong>Montant total à payer:</strong></span>
+              <span><strong>{{ rentalData.totalPrice + property.deposit }} ETH</strong></span>
+            </div>
+          </div>
+
+          <!-- Message d'erreur -->
+          <div *ngIf="error" class="error-message">
+            ❌ {{ error }}
+          </div>
+
+          <button type="submit" 
+                  class="btn btn-primary rent-btn" 
+                  [disabled]="!canRent() || processing">
+            {{ processing ? '⏳ Traitement...' : '✅ Confirmer la location' }}
+          </button>
+        </form>
+      </div>
+
+      <!-- Message si non connecté -->
+      <div *ngIf="!isConnected" class="connect-warning">
+        <h4>🔗 Connexion requise</h4>
+        <p>Veuillez connecter votre wallet MetaMask pour louer cette propriété</p>
+      </div>
+
+      <!-- Message si propriété occupée -->
+      <div *ngIf="!property.isAvailable" class="unavailable-warning">
+        <h4>❌ Non disponible</h4>
+        <p>Cette propriété est actuellement occupée</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading state -->
+<div *ngIf="loading" class="loading">
+  <p>Chargement de la propriété...</p>
+</div>
+
+<!-- Error state -->
+<div *ngIf="!property && !loading" class="not-found">
+  <h3>Propriété non trouvée</h3>
+  <button class="btn btn-secondary" (click)="goBack()">Retour aux propriétés</button>
+</div>

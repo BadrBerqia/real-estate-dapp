@@ -1,0 +1,20 @@
+<div class="simple-map">
+  <div class="header">
+    <h2>Carte des Propriétés</h2>
+    <button class="btn-list" (click)="switchToListView()">
+      Voir la liste
+    </button>
+  </div>
+
+  <div class="map-container">
+    <div id="map"></div>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Chargement de la carte...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+</div>

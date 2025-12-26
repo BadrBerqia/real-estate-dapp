@@ -1,0 +1,89 @@
+<div class="property-list-page">
+  <!-- En-tête avec actions -->
+  <div class="page-header">
+    <h1>🏠 Propriétés Disponibles</h1>
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="goToMap()">
+        🗺️ Voir sur la carte
+      </button>
+      <button *ngIf="isConnected" class="btn btn-primary" (click)="goToListProperty()">
+        ➕ Lister une propriété
+      </button>
+      <div *ngIf="!isConnected" class="connect-notice">
+        <p>Connectez-vous pour louer ou lister des propriétés</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="property-list-content">
+    <div *ngIf="loading" class="loading">Chargement des propriétés...</div>
+    
+    <div *ngIf="error" class="error">
+      {{ error }}
+      <button class="btn btn-primary" (click)="loadProperties()">Réessayer</button>
+    </div>
+
+    <div *ngIf="properties.length === 0 && !loading" class="no-properties">
+      <h3>Aucune propriété disponible</h3>
+      <p>Soyez le premier à lister une propriété !</p>
+      <button *ngIf="isConnected" class="btn btn-primary" (click)="goToListProperty()">
+        Lister la première propriété
+      </button>
+    </div>
+
+    <div class="properties-grid">
+      <div 
+        *ngFor="let property of properties" 
+        class="property-card"
+        (click)="viewProperty(property.id)"
+      >
+        <div class="property-image">
+          <img [src]="getPropertyImage(property.id)" [alt]="property.title">
+          <div class="property-badge" [class.available]="property.isAvailable">
+            {{ property.isAvailable ? '✅ Disponible' : '❌ Occupée' }}
+          </div>
+        </div>
+        
+        <div class="property-info">
+          <h3>{{ property.title }}</h3>
+          <p class="location">📍 {{ property.location }}</p>
+          <p class="description">{{ property.description || 'Aucune description' }}</p>
+          
+          <div class="property-details">
+            <div class="price">
+              <strong>{{ property.pricePerDay }} ETH/jour</strong>
+            </div>
+            <div class="deposit">
+              Dépôt: {{ property.deposit }} ETH
+            </div>
+          </div>
+          
+          <button 
+            class="btn btn-primary rent-btn"
+            (click)="$event.stopPropagation(); rentProperty(property)"
+            [disabled]="!property.isAvailable || !isConnected"
+          >
+            {{ !isConnected ? 'Connectez-vous' : (property.isAvailable ? 'Louer' : 'Indisponible') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation rapide -->
+  <div class="quick-nav" *ngIf="isConnected">
+    <h3>Navigation rapide</h3>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" (click)="goToMyProperties()">
+        👤 Mes Propriétés
+      </button>
+      <button class="btn btn-secondary" (click)="goToMyRentals()">
+        📅 Mes Locations
+      </button>
+      <button class="btn btn-secondary" (click)="goToProfile()">
+        🔧 Mon Profil
+      </button>
+    </div>
+  </div>
+</div>

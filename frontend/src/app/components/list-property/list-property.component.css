@@ -1,0 +1,358 @@
+/* list-property.component.css */
+.list-property {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f1f3f4;
+}
+
+.header h2 {
+  color: #1a365d;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.property-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4299e1;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #a0aec0;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Style spécifique pour les inputs de type number */
+.form-group input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.form-group input[type="number"]::-webkit-outer-spin-button,
+.form-group input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Indication des champs obligatoires */
+.form-group label[for]:after {
+  content: " *";
+  color: #e53e3e;
+}
+
+.form-group label[for="deposit"]:after,
+.form-group label[for="description"]:after {
+  content: "";
+}
+
+/* Style des boutons */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #f1f3f4;
+}
+
+.btn {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4299e1, #3182ce);
+  color: white;
+  min-width: 180px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3182ce, #2c5aa0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+}
+
+.btn-secondary {
+  background: #f7fafc;
+  color: #4a5568;
+  border: 2px solid #e2e8f0;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #edf2f7;
+  border-color: #cbd5e0;
+  transform: translateY(-1px);
+}
+
+/* États de validation */
+.form-group input.ng-invalid.ng-touched,
+.form-group textarea.ng-invalid.ng-touched {
+  border-color: #e53e3e;
+  background-color: #fff5f5;
+}
+
+.form-group input.ng-valid.ng-touched,
+.form-group textarea.ng-valid.ng-touched {
+  border-color: #38a169;
+  background-color: #f0fff4;
+}
+
+/* Messages d'erreur */
+.error-message {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Indications pour les prix */
+.price-hint {
+  font-size: 0.875rem;
+  color: #718096;
+  margin-top: 0.25rem;
+}
+
+/* Loading state */
+.processing-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4299e1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .list-property {
+    margin: 1rem;
+    padding: 1.5rem;
+    border-radius: 8px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .header h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .list-property {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+
+  .header h2 {
+    font-size: 1.25rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Animation pour le formulaire */
+.property-form {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Style pour les tooltips d'information */
+.info-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: help;
+}
+
+.info-tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #2d3748;
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  padding: 0.5rem;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.875rem;
+  font-weight: normal;
+}
+
+.info-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Style pour les icônes */
+.icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* Amélioration de l'accessibilité */
+.form-group input:focus-visible,
+.form-group textarea:focus-visible {
+  outline: 2px solid #4299e1;
+  outline-offset: 2px;
+}
+
+/* Mode sombre (optionnel) */
+@media (prefers-color-scheme: dark) {
+  .list-property {
+    background: #1a202c;
+    color: #e2e8f0;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    background-color: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    background-color: #2d3748;
+    border-color: #4299e1;
+  }
+
+  .btn-secondary {
+    background: #2d3748;
+    color: #e2e8f0;
+    border-color: #4a5568;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: #4a5568;
+  }
+}

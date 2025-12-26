@@ -1,0 +1,140 @@
+<div class="my-rentals">
+  <div class="header-section">
+    <h2>🏠 Mes Locations</h2>
+    <p class="subtitle">Gérez toutes vos locations de propriétés</p>
+  </div>
+
+  <!-- État de chargement -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Chargement de vos locations...</p>
+  </div>
+
+  <!-- Aucune location -->
+  <div *ngIf="rentals.length === 0 && !loading" class="no-rentals">
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>Aucune location trouvée</h3>
+      <p>Vous n'avez pas encore loué de propriétés.</p>
+      <button class="btn btn-primary" routerLink="/properties">
+        🔍 Explorer les propriétés
+      </button>
+    </div>
+  </div>
+
+  <!-- Liste des locations -->
+  <div *ngIf="rentals.length > 0 && !loading" class="rentals-container">
+    <div class="stats-bar">
+      <div class="stat">
+        <span class="stat-number">{{ rentals.length }}</span>
+        <span class="stat-label">Location(s)</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">{{ getActiveRentalsCount() }}</span>
+        <span class="stat-label">Active(s)</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">{{ getCompletedRentalsCount() }}</span>
+        <span class="stat-label">Terminée(s)</span>
+      </div>
+    </div>
+
+    <div class="rentals-grid">
+      <div *ngFor="let rental of rentals" class="rental-card" 
+           [class.active]="rental.isActive" 
+           [class.completed]="!rental.isActive">
+        
+        <!-- En-tête de la carte -->
+        <div class="card-header">
+          <div class="rental-info">
+            <h3 class="rental-title">Location #{{ rental.id }}</h3>
+            <div class="property-ref">Propriété #{{ rental.propertyId }}</div>
+          </div>
+          <div class="status-badge" [class]="getStatusClass(rental)">
+            {{ getStatusText(rental) }}
+          </div>
+        </div>
+
+        <!-- Dates de location -->
+        <div class="date-section">
+          <div class="date-range">
+            <div class="date-item">
+              <span class="date-label">📅 Arrivée</span>
+              <span class="date-value">{{ formatDate(rental.startDate) }}</span>
+            </div>
+            <div class="date-arrow">→</div>
+            <div class="date-item">
+              <span class="date-label">📅 Départ</span>
+              <span class="date-value">{{ formatDate(rental.endDate) }}</span>
+            </div>
+          </div>
+          <div class="duration">
+            ⏱️ {{ calculateDuration(rental.startDate, rental.endDate) }}
+          </div>
+        </div>
+
+        <!-- Détails financiers -->
+        <div class="financial-section">
+          <div class="amount-row">
+            <div class="amount-item">
+              <span class="amount-label">💰 Prix du séjour</span>
+              <span class="amount-value">{{ rental.totalPrice }} ETH</span>
+            </div>
+            <div class="amount-item">
+              <span class="amount-label">🛡️ Dépôt de garantie</span>
+              <span class="amount-value">{{ rental.deposit }} ETH</span>
+            </div>
+          </div>
+          <div class="total-amount">
+            <span class="total-label">💎 Montant total</span>
+            <span class="total-value">{{ rental.totalPrice + rental.deposit }} ETH</span>
+          </div>
+        </div>
+
+        <!-- État du dépôt -->
+        <div class="deposit-status" *ngIf="!rental.isActive">
+          <div class="deposit-info" [class.returned]="rental.depositReturned">
+            <span class="deposit-icon">
+              {{ rental.depositReturned ? '✅' : '⏳' }}
+            </span>
+            <span class="deposit-text">
+              {{ rental.depositReturned ? 'Dépôt retourné' : 'Dépôt en attente' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card-actions">
+          <button class="btn btn-outline" (click)="viewProperty(rental.propertyId)">
+            👀 Voir la propriété
+          </button>
+          <button *ngIf="rental.isActive && canCompleteRental(rental)" 
+                  class="btn btn-primary" 
+                  (click)="completeRental(rental.id)">
+            ✅ Terminer la location
+          </button>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline">
+          <div class="timeline-item" [class.active]="true">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="timeline-title">Location créée</span>
+              <span class="timeline-date">{{ formatDate(rental.startDate) }}</span>
+            </div>
+          </div>
+          <div class="timeline-item" [class.active]="!rental.isActive">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="timeline-title">Location terminée</span>
+              <span class="timeline-date" *ngIf="!rental.isActive">
+                {{ formatDate(rental.endDate) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
