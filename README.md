@@ -287,7 +287,3 @@ kubectl get secret monitoring-grafana -o jsonpath="{.data.admin-password}" | bas
 | **ML Engineer** | Modèles ML, FastAPI |
 
 ---
-
-## 📄 Licence
-
-Projet académique - Master Data Science & Engineering
