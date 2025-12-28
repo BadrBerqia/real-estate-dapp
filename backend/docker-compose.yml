@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: real-estate-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=real_estate_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  service-discovery:
+    build: ./service-discovery
+    container_name: service-discovery
+    ports:
+      - "8761:8761"
+    environment:
+      - EUREKA_CLIENT_REGISTER-WITH-EUREKA=false
+      - EUREKA_CLIENT_FETCH-REGISTRY=false
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+    depends_on:
+      - service-discovery
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/real_estate_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+    depends_on:
+      - postgres
+      - service-discovery
+
+  property-service:
+    build: ./property-service
+    container_name: property-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/real_estate_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+    depends_on:
+      - postgres
+      - service-discovery
+
+  rental-service:
+    build: ./rental-service
+    container_name: rental-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/real_estate_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+    depends_on:
+      - postgres
+      - service-discovery
+
+  blockchain-integration-service:
+    build: ./blockchain-integration-service
+    container_name: blockchain-service
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+    depends_on:
+      - service-discovery
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/real_estate_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-discovery:8761/eureka/
+    depends_on:
+      - postgres
+      - service-discovery
+
+volumes:
+  postgres-data:

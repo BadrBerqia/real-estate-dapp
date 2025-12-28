@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-discovery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-discovery
+  template:
+    metadata:
+      labels:
+        app: service-discovery
+    spec:
+      containers:
+      - name: service-discovery
+        image: us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/service-discovery:latest
+        ports:
+        - containerPort: 8761
+        env:
+        - name: EUREKA_CLIENT_REGISTER-WITH-EUREKA
+          value: "false"
+        - name: EUREKA_CLIENT_FETCH-REGISTRY
+          value: "false"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-discovery
+spec:
+  selector:
+    app: service-discovery
+  ports:
+  - port: 8761
+    targetPort: 8761
