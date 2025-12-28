@@ -1,42 +1,36 @@
 server:
   port: 8080
-
 spring:
   application:
     name: api-gateway
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
       routes:
         - id: user-service
-          uri: lb://user-service
+          uri: http://user-service:8080
           predicates:
             - Path=/api/users/**
         - id: property-service
-          uri: lb://property-service
+          uri: http://property-service:8080
           predicates:
             - Path=/api/properties/**
         - id: rental-service
-          uri: lb://rental-service
+          uri: http://rental-service:8080
           predicates:
             - Path=/api/rentals/**
         - id: blockchain-integration-service
-          uri: lb://blockchain-integration-service
+          uri: http://blockchain-service:8080
           predicates:
             - Path=/api/blockchain/**
         - id: payment-service
-          uri: lb://payment-service
+          uri: http://payment-service:8080
           predicates:
             - Path=/api/payments/**
       globalcors:
         cors-configurations:
           '[/**]':
             allowedOrigins:
-              - "http://104.197.229.223"
-              - "http://localhost:4200"
+              - "*"
             allowedMethods:
               - GET
               - POST
@@ -45,8 +39,6 @@ spring:
               - OPTIONS
             allowedHeaders:
               - "*"
-            allowCredentials: true
-
 eureka:
   client:
     service-url:

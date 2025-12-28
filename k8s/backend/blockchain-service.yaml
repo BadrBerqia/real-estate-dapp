@@ -30,4 +30,4 @@ spec:
     app: blockchain-service
   ports:
   - port: 8080
-    targetPort: 8080
+    targetPort: 8084
