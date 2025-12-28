@@ -1,27 +1,77 @@
 <div class="app-container">
+  <!-- Header moderne -->
   <header class="app-header">
-    <div class="container">
-      <h1>🏠 RealEstate Rental dApp</h1>
-      <app-wallet-connect></app-wallet-connect>
+    <div class="container header-content">
+      <a routerLink="/" class="logo">
+        <span class="logo-icon">🏠</span>
+        <span class="logo-text">BlockEstate</span>
+        <span class="logo-badge">dApp</span>
+      </a>
+      
+      <nav class="main-nav">
+        <a routerLink="/properties" routerLinkActive="active">
+          <span class="nav-icon">🏘️</span>
+          <span>Explorer</span>
+        </a>
+        <a routerLink="/properties/map" routerLinkActive="active">
+          <span class="nav-icon">🗺️</span>
+          <span>Carte</span>
+        </a>
+        <a routerLink="/my-properties" routerLinkActive="active">
+          <span class="nav-icon">🏡</span>
+          <span>Mes Biens</span>
+        </a>
+        <a routerLink="/my-rentals" routerLinkActive="active">
+          <span class="nav-icon">📋</span>
+          <span>Locations</span>
+        </a>
+        <a routerLink="/list-property" routerLinkActive="active" class="nav-cta">
+          <span class="nav-icon">✨</span>
+          <span>Publier</span>
+        </a>
+      </nav>
+
+      <div class="header-actions">
+        <app-wallet-connect></app-wallet-connect>
+      </div>
     </div>
   </header>
 
-  <nav class="app-nav">
-    <div class="container">
-      <ul>
-        <li><a routerLink="/properties" routerLinkActive="active">📋 Propriétés</a></li>
-        <li><a routerLink="/properties/map" routerLinkActive="active">🗺️ Carte</a></li>
-        <li><a routerLink="/my-properties" routerLinkActive="active">👤 Mes Propriétés</a></li>
-        <li><a routerLink="/my-rentals" routerLinkActive="active">📅 Mes Locations</a></li>
-        <li><a routerLink="/list-property" routerLinkActive="active">➕ Lister</a></li>
-        <li><a routerLink="/profile" routerLinkActive="active">👤 Profil</a></li>
-      </ul>
-    </div>
-  </nav>
-
+  <!-- Main Content -->
   <main class="app-main">
-    <div class="container">
-      <router-outlet></router-outlet>
-    </div>
+    <router-outlet></router-outlet>
   </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <span class="logo-icon">🏠</span>
+          <span>BlockEstate</span>
+          <p>Location immobilière décentralisée sur Ethereum</p>
+        </div>
+        <div class="footer-tech">
+          <h4>Technologies</h4>
+          <div class="tech-badges">
+            <span class="tech-badge">⟠ Ethereum</span>
+            <span class="tech-badge">🦊 MetaMask</span>
+            <span class="tech-badge">📜 Solidity</span>
+            <span class="tech-badge">🅰️ Angular</span>
+            <span class="tech-badge">☕ Spring Boot</span>
+            <span class="tech-badge">☸️ Kubernetes</span>
+          </div>
+        </div>
+        <div class="footer-info">
+          <h4>Réseau</h4>
+          <p>🔗 Sepolia Testnet</p>
+          <p class="contract-address">📝 0xc4e6...dFF</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 BlockEstate - Projet Académique</p>
+        <p>🎓 Master Data Science & Engineering</p>
+      </div>
+    </div>
+  </footer>
 </div>
