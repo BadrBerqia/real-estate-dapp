@@ -176,7 +176,7 @@ export class BlockchainService {
       ],
       "stateMutability": "view",
       "type": "function"
-    }
+    },
     // blockDates
     {
       "inputs": [
