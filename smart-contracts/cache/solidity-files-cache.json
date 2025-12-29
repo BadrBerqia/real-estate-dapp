@@ -1,0 +1,40 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "C:\\Users\\Nasseem\\real-estate-dapp\\smart-contracts\\contracts\\RentalEscrow.sol": {
+      "lastModificationDate": 1767026909983,
+      "contentHash": "7c65b9433a05c88af7fa7a069ec53c8c",
+      "sourceName": "contracts/RentalEscrow.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "RealEstateRental"
+      ]
+    }
+  }
+}
