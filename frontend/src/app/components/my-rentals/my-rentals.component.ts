@@ -11,6 +11,7 @@ import { RentalAgreement } from '../../models/property.model';
 export class MyRentalsComponent implements OnInit {
   rentals: RentalAgreement[] = [];
   loading = true;
+  processingId: number | null = null;
 
   constructor(
     private blockchainService: BlockchainService,
@@ -25,11 +26,14 @@ export class MyRentalsComponent implements OnInit {
     try {
       const rentalIds = await this.blockchainService.getUserRentals();
       this.rentals = [];
-      
+
       for (const id of rentalIds) {
         const rental = await this.blockchainService.getRentalAgreement(id);
         this.rentals.push(rental);
       }
+      
+      // Trier par ID décroissant (plus récent en premier)
+      this.rentals.sort((a, b) => b.id - a.id);
     } catch (error) {
       console.error('Error loading rentals:', error);
     } finally {
@@ -37,24 +41,29 @@ export class MyRentalsComponent implements OnInit {
     }
   }
 
-  // Nouvelles méthodes utilitaires
   getActiveRentalsCount(): number {
     return this.rentals.filter(rental => rental.isActive).length;
   }
 
   getCompletedRentalsCount(): number {
-    return this.rentals.filter(rental => !rental.isActive).length;
+    return this.rentals.filter(rental => rental.isCompleted).length;
+  }
+
+  getCancelledRentalsCount(): number {
+    return this.rentals.filter(rental => rental.isCancelled).length;
   }
 
   getStatusClass(rental: RentalAgreement): string {
+    if (rental.isCancelled) return 'cancelled';
     if (rental.isActive) return 'active';
-    if (rental.isCompleted && rental.depositReturned) return 'completed';
+    if (rental.isCompleted) return 'completed';
     return 'pending';
   }
 
   getStatusText(rental: RentalAgreement): string {
+    if (rental.isCancelled) return 'Annulée';
     if (rental.isActive) return 'Active';
-    if (rental.isCompleted && rental.depositReturned) return 'Terminée';
+    if (rental.isCompleted) return 'Terminée';
     return 'En attente';
   }
 
@@ -69,7 +78,11 @@ export class MyRentalsComponent implements OnInit {
 
   canCompleteRental(rental: RentalAgreement): boolean {
     const now = Math.floor(Date.now() / 1000);
-    return now >= rental.endDate;
+    return rental.isActive && now >= rental.endDate;
+  }
+
+  canCancelRental(rental: RentalAgreement): boolean {
+    return rental.isActive;
   }
 
   viewProperty(propertyId: number) {
@@ -77,11 +90,42 @@ export class MyRentalsComponent implements OnInit {
   }
 
   async completeRental(rentalId: number) {
+    if (this.processingId) return;
+    
     try {
+      this.processingId = rentalId;
       await this.blockchainService.completeRental(rentalId);
-      await this.loadMyRentals(); // Recharger les données
-    } catch (error) {
+      await this.loadMyRentals();
+      alert('✅ Location terminée avec succès ! Le dépôt a été retourné.');
+    } catch (error: any) {
       console.error('Erreur lors de la complétion:', error);
+      alert('❌ Erreur: ' + error.message);
+    } finally {
+      this.processingId = null;
+    }
+  }
+
+  async cancelRental(rentalId: number) {
+    if (this.processingId) return;
+    
+    const confirmed = confirm(
+      '⚠️ Êtes-vous sûr de vouloir annuler cette location ?\n\n' +
+      '• Si annulée avant la date de début : le dépôt vous sera retourné\n' +
+      '• Si annulée après la date de début : le dépôt ira au propriétaire'
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+      this.processingId = rentalId;
+      await this.blockchainService.cancelRental(rentalId);
+      await this.loadMyRentals();
+      alert('✅ Location annulée avec succès !');
+    } catch (error: any) {
+      console.error('Erreur lors de l\'annulation:', error);
+      alert('❌ Erreur: ' + error.message);
+    } finally {
+      this.processingId = null;
     }
   }
 }

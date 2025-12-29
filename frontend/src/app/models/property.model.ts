@@ -20,5 +20,6 @@ export interface RentalAgreement {
   deposit: number;
   isActive: boolean;
   isCompleted: boolean;
+  isCancelled: boolean;
   depositReturned: boolean;
 }

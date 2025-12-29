@@ -376,29 +376,31 @@ export class BlockchainService {
   }
 
   async getRentalAgreement(rentalId: number): Promise<RentalAgreement> {
-    try {
-      const contract = this.getContract();
-      const rental = await contract.methods.getRentalAgreement(rentalId).call();
+  try {
+    const contract = this.getContract();
+    const rental = await contract.methods.getRentalAgreement(rentalId).call();
 
-      const statusMap = ['Active', 'Completed', 'Cancelled'];
+    // Status: 0 = Active, 1 = Completed, 2 = Cancelled
+    const status = Number(rental.status);
 
-      return {
-        id: Number(rental.id),
-        propertyId: Number(rental.propertyId),
-        tenant: rental.tenant,
-        startDate: Number(rental.startDate),
-        endDate: Number(rental.endDate),
-        totalPrice: this.weiToEth(rental.totalPrice),
-        deposit: this.weiToEth(rental.deposit),
-        isActive: Number(rental.status) === 0,
-        isCompleted: Number(rental.status) === 1,
-        depositReturned: Number(rental.status) === 1
-      };
-    } catch (error: any) {
-      console.error('Error fetching rental:', error);
-      throw new Error('Unable to fetch rental');
-    }
+    return {
+      id: Number(rental.id),
+      propertyId: Number(rental.propertyId),
+      tenant: rental.tenant,
+      startDate: Number(rental.startDate),
+      endDate: Number(rental.endDate),
+      totalPrice: this.weiToEth(rental.totalPrice),
+      deposit: this.weiToEth(rental.deposit),
+      isActive: status === 0,
+      isCompleted: status === 1,
+      isCancelled: status === 2,
+      depositReturned: status === 1
+    };
+  } catch (error: any) {
+    console.error('Error fetching rental:', error);
+    throw new Error('Unable to fetch rental');
   }
+}
 
   async getUserRentals(): Promise<number[]> {
     try {

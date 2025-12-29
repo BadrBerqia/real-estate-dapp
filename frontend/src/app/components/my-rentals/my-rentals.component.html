@@ -37,13 +37,18 @@
         <span class="stat-number">{{ getCompletedRentalsCount() }}</span>
         <span class="stat-label">Terminée(s)</span>
       </div>
+      <div class="stat">
+        <span class="stat-number">{{ getCancelledRentalsCount() }}</span>
+        <span class="stat-label">Annulée(s)</span>
+      </div>
     </div>
 
     <div class="rentals-grid">
-      <div *ngFor="let rental of rentals" class="rental-card" 
-           [class.active]="rental.isActive" 
-           [class.completed]="!rental.isActive">
-        
+      <div *ngFor="let rental of rentals" class="rental-card"
+           [class.active]="rental.isActive"
+           [class.completed]="rental.isCompleted"
+           [class.cancelled]="rental.isCancelled">
+
         <!-- En-tête de la carte -->
         <div class="card-header">
           <div class="rental-info">
@@ -93,12 +98,12 @@
 
         <!-- État du dépôt -->
         <div class="deposit-status" *ngIf="!rental.isActive">
-          <div class="deposit-info" [class.returned]="rental.depositReturned">
+          <div class="deposit-info" [class.returned]="rental.depositReturned" [class.cancelled]="rental.isCancelled">
             <span class="deposit-icon">
-              {{ rental.depositReturned ? '✅' : '⏳' }}
+              {{ rental.isCancelled ? '❌' : (rental.depositReturned ? '✅' : '⏳') }}
             </span>
             <span class="deposit-text">
-              {{ rental.depositReturned ? 'Dépôt retourné' : 'Dépôt en attente' }}
+              {{ rental.isCancelled ? 'Location annulée' : (rental.depositReturned ? 'Dépôt retourné' : 'Dépôt en attente') }}
             </span>
           </div>
         </div>
@@ -108,10 +113,21 @@
           <button class="btn btn-outline" (click)="viewProperty(rental.propertyId)">
             👀 Voir la propriété
           </button>
-          <button *ngIf="rental.isActive && canCompleteRental(rental)" 
-                  class="btn btn-primary" 
-                  (click)="completeRental(rental.id)">
-            ✅ Terminer la location
+          
+          <!-- Bouton Terminer -->
+          <button *ngIf="rental.isActive && canCompleteRental(rental)"
+                  class="btn btn-primary"
+                  (click)="completeRental(rental.id)"
+                  [disabled]="processingId === rental.id">
+            {{ processingId === rental.id ? '⏳ Traitement...' : '✅ Terminer' }}
+          </button>
+          
+          <!-- Bouton Annuler -->
+          <button *ngIf="rental.isActive && canCancelRental(rental)"
+                  class="btn btn-danger"
+                  (click)="cancelRental(rental.id)"
+                  [disabled]="processingId === rental.id">
+            {{ processingId === rental.id ? '⏳ Traitement...' : '❌ Annuler' }}
           </button>
         </div>
 
@@ -124,10 +140,10 @@
               <span class="timeline-date">{{ formatDate(rental.startDate) }}</span>
             </div>
           </div>
-          <div class="timeline-item" [class.active]="!rental.isActive">
+          <div class="timeline-item" [class.active]="rental.isCompleted" [class.cancelled]="rental.isCancelled">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
-              <span class="timeline-title">Location terminée</span>
+              <span class="timeline-title">{{ rental.isCancelled ? 'Location annulée' : 'Location terminée' }}</span>
               <span class="timeline-date" *ngIf="!rental.isActive">
                 {{ formatDate(rental.endDate) }}
               </span>
