@@ -7,7 +7,7 @@ import { Property, RentalAgreement } from '../models/property.model';
 })
 export class BlockchainService {
   private contract: any;
-  private contractAddress = '0x61047384CDaB946D6182F5EDb700C8690a1a6C84';
+  private contractAddress = '0x70Fdf00E81a6A3C37E8d557dDca47D70D8dc1B7D';
 
   private contractABI = [
     // listProperty

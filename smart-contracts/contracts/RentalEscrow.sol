@@ -317,30 +317,22 @@ contract RealEstateRental {
         
         rental.status = RentalStatus.Cancelled;
         
-        uint256 refundAmount = rental.deposit;
+        // Le dépôt est toujours dans le contrat, on peut le rembourser
+        uint256 depositToRefund = rental.deposit;
         
-        // Refund policy: if cancelled before start date, refund deposit
-        // If owner cancels, also refund the rental price
-        if (msg.sender == property.owner) {
-            // Owner cancels - full refund to tenant
-            refundAmount += rental.totalPrice;
-        }
-        
-        // If tenant cancels after start, they lose the rental price (already paid to owner)
-        // But they get deposit back if cancelled before end
         if (block.timestamp < rental.startDate) {
-            // Cancelled before start - tenant gets deposit back
-            if (refundAmount > 0) {
-                payable(rental.tenant).transfer(refundAmount);
+            // Annulé avant le début - le locataire récupère son dépôt
+            if (depositToRefund > 0) {
+                payable(rental.tenant).transfer(depositToRefund);
             }
         } else {
-            // Cancelled after start - deposit goes to owner as compensation
-            if (rental.deposit > 0) {
-                payable(property.owner).transfer(rental.deposit);
+            // Annulé après le début - le dépôt va au propriétaire comme compensation
+            if (depositToRefund > 0) {
+                payable(property.owner).transfer(depositToRefund);
             }
         }
         
-        emit RentalCancelled(_rentalId, msg.sender, refundAmount);
+        emit RentalCancelled(_rentalId, msg.sender, depositToRefund);
     }
     
     /// @notice Block dates for owner's personal use (no payment required)
