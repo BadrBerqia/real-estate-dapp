@@ -343,6 +343,45 @@ contract RealEstateRental {
         emit RentalCancelled(_rentalId, msg.sender, refundAmount);
     }
     
+    /// @notice Block dates for owner's personal use (no payment required)
+    /// @param _propertyId The property ID
+    /// @param _startDate Start date (unix timestamp)
+    /// @param _endDate End date (unix timestamp)
+    /// @return rentalId The ID of the blocking reservation
+    function blockDates(
+        uint256 _propertyId,
+        uint256 _startDate,
+        uint256 _endDate
+    ) external propertyExists(_propertyId) onlyPropertyOwner(_propertyId) returns (uint256) {
+        Property storage property = properties[_propertyId];
+        
+        require(property.isActive, "Property not active");
+        require(_startDate >= block.timestamp, "Start date must be in future");
+        require(_endDate > _startDate, "End date must be after start date");
+        require(!hasDateConflict(_propertyId, _startDate, _endDate), "Dates conflict with existing rental");
+        
+        // Create a "self-rental" with 0 payment
+        rentalCounter++;
+        uint256 newRentalId = rentalCounter;
+        
+        RentalAgreement storage newRental = rentals[newRentalId];
+        newRental.id = newRentalId;
+        newRental.propertyId = _propertyId;
+        newRental.tenant = msg.sender; // Owner is the tenant
+        newRental.startDate = _startDate;
+        newRental.endDate = _endDate;
+        newRental.totalPrice = 0;
+        newRental.deposit = 0;
+        newRental.status = RentalStatus.Active;
+        
+        property.rentalIds.push(newRentalId);
+        userRentals[msg.sender].push(newRentalId);
+        
+        emit RentalCreated(newRentalId, _propertyId, msg.sender, _startDate, _endDate);
+        
+        return newRentalId;
+    }
+    
     /// @notice Get rental agreement details
     /// @param _rentalId The rental ID
     /// @return The rental agreement

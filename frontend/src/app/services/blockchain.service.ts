@@ -7,7 +7,7 @@ import { Property, RentalAgreement } from '../models/property.model';
 })
 export class BlockchainService {
   private contract: any;
-  private contractAddress = '0x017E502864B84d1b6d821d914Fc9B591b1880A6a';
+  private contractAddress = '0x61047384CDaB946D6182F5EDb700C8690a1a6C84';
 
   private contractABI = [
     // listProperty
@@ -177,6 +177,19 @@ export class BlockchainService {
       "stateMutability": "view",
       "type": "function"
     }
+    // blockDates
+    {
+      "inputs": [
+        {"internalType": "uint256", "name": "_propertyId", "type": "uint256"},
+        {"internalType": "uint256", "name": "_startDate", "type": "uint256"},
+        {"internalType": "uint256", "name": "_endDate", "type": "uint256"}
+      ],
+      "name": "blockDates",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    
   ];
 
   constructor(private web3Service: Web3Service) {
@@ -374,6 +387,20 @@ export class BlockchainService {
       throw new Error(this.parseError(error));
     }
   }
+  async blockDates(propertyId: number, startDate: number, endDate: number): Promise<any> {
+  try {
+    const account = await this.web3Service.connectAccount();
+    const contract = this.getContract();
+
+    const transaction = contract.methods.blockDates(propertyId, startDate, endDate);
+    const gas = await this.estimateGasWithFallback(transaction, account);
+
+    return await transaction.send({ from: account, gas });
+  } catch (error: any) {
+    console.error('Error blocking dates:', error);
+    throw new Error(this.parseError(error));
+  }
+}
 
   async getRentalAgreement(rentalId: number): Promise<RentalAgreement> {
   try {
