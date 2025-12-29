@@ -1,11 +1,14 @@
 <div class="property-detail" *ngIf="property">
   <div class="back-nav">
-    <button class="btn btn-secondary" (click)="goBack()">← Retour aux propriétés</button>
+    <button class="btn btn-secondary" (click)="goBack()">
+      ← {{ isOwner ? 'Retour à mes propriétés' : 'Retour aux propriétés' }}
+    </button>
   </div>
 
   <div class="property-header">
     <h1>{{ property.title }}</h1>
     <p class="location">📍 {{ property.location }}</p>
+    <span *ngIf="isOwner" class="owner-badge">🏠 Votre propriété</span>
   </div>
 
   <div class="property-content">
@@ -21,8 +24,8 @@
         <p>{{ property.description || 'Aucune description disponible' }}</p>
       </div>
 
-      <!-- Détails de la propriété -->
-      <div class="details-section">
+      <!-- Détails de la propriété (Mode lecture) -->
+      <div class="details-section" *ngIf="!editMode">
         <h3>Détails</h3>
         <div class="detail-item">
           <span class="label">Prix par jour:</span>
@@ -38,24 +41,142 @@
         </div>
         <div class="detail-item">
           <span class="label">Statut:</span>
-          <span class="value" [class.available]="property.isAvailable" 
+          <span class="value" [class.available]="property.isAvailable"
                 [class.unavailable]="!property.isAvailable">
             {{ property.isAvailable ? '✅ Disponible' : '❌ Occupée' }}
           </span>
         </div>
       </div>
 
-      <!-- Formulaire de location -->
-      <div class="rental-form" *ngIf="property.isAvailable && isConnected">
-        <h3>📅 Réserver cette propriété</h3>
+      <!-- ========== VUE PROPRIÉTAIRE ========== -->
+      <div *ngIf="isOwner" class="owner-section">
         
+        <!-- Bouton Modifier -->
+        <div class="owner-actions">
+          <button class="btn btn-secondary" (click)="toggleEditMode()">
+            {{ editMode ? '❌ Annuler' : '✏️ Modifier les détails' }}
+          </button>
+        </div>
+
+        <!-- Formulaire de modification -->
+        <div *ngIf="editMode" class="edit-form">
+          <h3>✏️ Modifier la propriété</h3>
+          
+          <div class="form-group">
+            <label>Titre</label>
+            <input type="text" [(ngModel)]="editData.title" class="form-control">
+          </div>
+          
+          <div class="form-group">
+            <label>Description</label>
+            <textarea [(ngModel)]="editData.description" class="form-control" rows="3"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Localisation</label>
+            <input type="text" [(ngModel)]="editData.location" class="form-control">
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Prix par jour (ETH)</label>
+              <input type="number" [(ngModel)]="editData.pricePerDay" class="form-control" step="0.001">
+            </div>
+            
+            <div class="form-group">
+              <label>Dépôt de garantie (ETH)</label>
+              <input type="number" [(ngModel)]="editData.deposit" class="form-control" step="0.001">
+            </div>
+          </div>
+          
+          <button class="btn btn-primary" (click)="saveChanges()">
+            💾 Sauvegarder les modifications
+          </button>
+        </div>
+
+        <!-- Section Réservations -->
+        <div class="bookings-section" *ngIf="!editMode">
+          <h3>📅 Réservations de cette propriété</h3>
+          
+          <div *ngIf="loadingBookings" class="loading-bookings">
+            <p>Chargement des réservations...</p>
+          </div>
+          
+          <div *ngIf="!loadingBookings && bookings.length === 0" class="no-bookings">
+            <div class="empty-bookings">
+              <span class="empty-icon">📭</span>
+              <p>Aucune réservation pour cette propriété</p>
+            </div>
+          </div>
+          
+          <div *ngIf="!loadingBookings && bookings.length > 0" class="bookings-list">
+            <div class="bookings-summary">
+              <div class="summary-item">
+                <span class="summary-value">{{ bookings.length }}</span>
+                <span class="summary-label">Total</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-value">{{ getActiveBookingsCount() }}</span>
+                <span class="summary-label">Active(s)</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-value">{{ getCompletedBookingsCount() }}</span>
+                <span class="summary-label">Terminée(s)</span>
+              </div>
+            </div>
+            
+            <div *ngFor="let booking of bookings" class="booking-card" [class]="getBookingStatusClass(booking)">
+              <div class="booking-header">
+                <span class="booking-id">Location #{{ booking.id }}</span>
+                <span class="booking-status" [class]="getBookingStatusClass(booking)">
+                  {{ getBookingStatusText(booking) }}
+                </span>
+              </div>
+              
+              <div class="booking-dates">
+                <div class="date-item">
+                  <span class="date-label">📅 Arrivée</span>
+                  <span class="date-value">{{ formatDate(booking.startDate) }}</span>
+                </div>
+                <span class="date-arrow">→</span>
+                <div class="date-item">
+                  <span class="date-label">📅 Départ</span>
+                  <span class="date-value">{{ formatDate(booking.endDate) }}</span>
+                </div>
+              </div>
+              
+              <div class="booking-details">
+                <div class="detail">
+                  <span class="detail-label">Locataire:</span>
+                  <span class="detail-value">{{ formatAddress(booking.tenant) }}</span>
+                </div>
+                <div class="detail">
+                  <span class="detail-label">Montant:</span>
+                  <span class="detail-value">{{ booking.totalPrice }} ETH</span>
+                </div>
+                <div class="detail">
+                  <span class="detail-label">Dépôt:</span>
+                  <span class="detail-value">{{ booking.deposit }} ETH</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== VUE LOCATAIRE ========== -->
+      
+      <!-- Formulaire de location (seulement pour non-propriétaires) -->
+      <div class="rental-form" *ngIf="!isOwner && property.isAvailable && isConnected">
+        <h3>📅 Réserver cette propriété</h3>
+
         <form (ngSubmit)="onRentSubmit()" #rentalForm="ngForm">
           <div class="form-group">
             <label for="startDate">Date d'arrivée *</label>
-            <input type="date" id="startDate" 
-                   [(ngModel)]="rentalData.startDate" 
-                   name="startDate" 
-                   required 
+            <input type="date" id="startDate"
+                   [(ngModel)]="rentalData.startDate"
+                   name="startDate"
+                   required
                    [min]="getMinStartDate()"
                    (change)="calculateTotal()"
                    class="form-control">
@@ -64,10 +185,10 @@
 
           <div class="form-group">
             <label for="endDate">Date de départ *</label>
-            <input type="date" id="endDate" 
-                   [(ngModel)]="rentalData.endDate" 
-                   name="endDate" 
-                   required 
+            <input type="date" id="endDate"
+                   [(ngModel)]="rentalData.endDate"
+                   name="endDate"
+                   required
                    [min]="getMinEndDate()"
                    (change)="calculateTotal()"
                    class="form-control">
@@ -96,8 +217,8 @@
             ❌ {{ error }}
           </div>
 
-          <button type="submit" 
-                  class="btn btn-primary rent-btn" 
+          <button type="submit"
+                  class="btn btn-primary rent-btn"
                   [disabled]="!canRent() || processing">
             {{ processing ? '⏳ Traitement...' : '✅ Confirmer la location' }}
           </button>
@@ -107,11 +228,17 @@
       <!-- Message si non connecté -->
       <div *ngIf="!isConnected" class="connect-warning">
         <h4>🔗 Connexion requise</h4>
-        <p>Veuillez connecter votre wallet MetaMask pour louer cette propriété</p>
+        <p>Veuillez connecter votre wallet MetaMask pour voir les détails</p>
       </div>
 
-      <!-- Message si propriété occupée -->
-      <div *ngIf="!property.isAvailable" class="unavailable-warning">
+      <!-- Message si propriétaire essaie de louer -->
+      <div *ngIf="isOwner && !editMode" class="owner-info">
+        <h4>ℹ️ Information</h4>
+        <p>Vous êtes le propriétaire de ce bien. Vous pouvez voir les réservations ci-dessus.</p>
+      </div>
+
+      <!-- Message si propriété occupée (pour non-propriétaires) -->
+      <div *ngIf="!isOwner && !property.isAvailable && isConnected" class="unavailable-warning">
         <h4>❌ Non disponible</h4>
         <p>Cette propriété est actuellement occupée</p>
       </div>
