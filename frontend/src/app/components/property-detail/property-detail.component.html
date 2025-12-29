@@ -50,7 +50,7 @@
 
       <!-- ========== VUE PROPRIÉTAIRE ========== -->
       <div *ngIf="isOwner" class="owner-section">
-        
+
         <!-- Bouton Modifier -->
         <div class="owner-actions">
           <button class="btn btn-secondary" (click)="toggleEditMode()">
@@ -61,34 +61,34 @@
         <!-- Formulaire de modification -->
         <div *ngIf="editMode" class="edit-form">
           <h3>✏️ Modifier la propriété</h3>
-          
+
           <div class="form-group">
             <label>Titre</label>
             <input type="text" [(ngModel)]="editData.title" class="form-control">
           </div>
-          
+
           <div class="form-group">
             <label>Description</label>
             <textarea [(ngModel)]="editData.description" class="form-control" rows="3"></textarea>
           </div>
-          
+
           <div class="form-group">
             <label>Localisation</label>
             <input type="text" [(ngModel)]="editData.location" class="form-control">
           </div>
-          
+
           <div class="form-row">
             <div class="form-group">
               <label>Prix par jour (ETH)</label>
               <input type="number" [(ngModel)]="editData.pricePerDay" class="form-control" step="0.001">
             </div>
-            
+
             <div class="form-group">
               <label>Dépôt de garantie (ETH)</label>
               <input type="number" [(ngModel)]="editData.deposit" class="form-control" step="0.001">
             </div>
           </div>
-          
+
           <button class="btn btn-primary" (click)="saveChanges()">
             💾 Sauvegarder les modifications
           </button>
@@ -97,18 +97,48 @@
         <!-- Section Réservations -->
         <div class="bookings-section" *ngIf="!editMode">
           <h3>📅 Réservations de cette propriété</h3>
-          
+
+          <!-- Formulaire de blocage de dates -->
+          <div class="block-dates-form">
+            <h4>🔒 Bloquer des dates</h4>
+            <p class="form-hint">Bloquez des dates pour votre usage personnel</p>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label>Date début</label>
+                <input type="date" 
+                       [(ngModel)]="blockData.startDate" 
+                       [min]="getMinStartDate()"
+                       class="form-control">
+              </div>
+              <div class="form-group">
+                <label>Date fin</label>
+                <input type="date" 
+                       [(ngModel)]="blockData.endDate" 
+                       [min]="blockData.startDate || getMinStartDate()"
+                       class="form-control">
+              </div>
+              <div class="form-group form-action">
+                <button class="btn btn-secondary" 
+                        (click)="blockDates()"
+                        [disabled]="!canBlockDates() || processingBlock">
+                  {{ processingBlock ? '⏳...' : '🔒 Bloquer' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div *ngIf="loadingBookings" class="loading-bookings">
             <p>Chargement des réservations...</p>
           </div>
-          
+
           <div *ngIf="!loadingBookings && bookings.length === 0" class="no-bookings">
             <div class="empty-bookings">
               <span class="empty-icon">📭</span>
               <p>Aucune réservation pour cette propriété</p>
             </div>
           </div>
-          
+
           <div *ngIf="!loadingBookings && bookings.length > 0" class="bookings-list">
             <div class="bookings-summary">
               <div class="summary-item">
@@ -124,15 +154,17 @@
                 <span class="summary-label">Terminée(s)</span>
               </div>
             </div>
-            
+
             <div *ngFor="let booking of bookings" class="booking-card" [class]="getBookingStatusClass(booking)">
               <div class="booking-header">
-                <span class="booking-id">Location #{{ booking.id }}</span>
+                <span class="booking-id">
+                  {{ isOwnerBooking(booking) ? '🔒 Blocage' : 'Location' }} #{{ booking.id }}
+                </span>
                 <span class="booking-status" [class]="getBookingStatusClass(booking)">
                   {{ getBookingStatusText(booking) }}
                 </span>
               </div>
-              
+
               <div class="booking-dates">
                 <div class="date-item">
                   <span class="date-label">📅 Arrivée</span>
@@ -144,9 +176,9 @@
                   <span class="date-value">{{ formatDate(booking.endDate) }}</span>
                 </div>
               </div>
-              
+
               <div class="booking-details">
-                <div class="detail">
+                <div class="detail" *ngIf="!isOwnerBooking(booking)">
                   <span class="detail-label">Locataire:</span>
                   <span class="detail-value">{{ formatAddress(booking.tenant) }}</span>
                 </div>
@@ -159,13 +191,22 @@
                   <span class="detail-value">{{ booking.deposit }} ETH</span>
                 </div>
               </div>
+
+              <!-- Bouton annuler pour le propriétaire -->
+              <div class="booking-actions" *ngIf="booking.isActive">
+                <button class="btn btn-danger btn-sm" 
+                        (click)="cancelBooking(booking.id)"
+                        [disabled]="processingCancel === booking.id">
+                  {{ processingCancel === booking.id ? '⏳...' : '❌ Annuler' }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- ========== VUE LOCATAIRE ========== -->
-      
+
       <!-- Formulaire de location (seulement pour non-propriétaires) -->
       <div class="rental-form" *ngIf="!isOwner && property.isAvailable && isConnected">
         <h3>📅 Réserver cette propriété</h3>

@@ -17,7 +17,7 @@ export class PropertyDetailComponent implements OnInit {
   processing = false;
   error = '';
   currentAccount = '';
-  
+
   // Mode édition
   editMode = false;
   editData = {
@@ -31,6 +31,14 @@ export class PropertyDetailComponent implements OnInit {
   // Réservations de la propriété
   bookings: RentalAgreement[] = [];
   loadingBookings = false;
+
+  // Blocage de dates
+  blockData = {
+    startDate: '',
+    endDate: ''
+  };
+  processingBlock = false;
+  processingCancel: number | null = null;
 
   // Données du formulaire de location
   rentalData = {
@@ -50,7 +58,7 @@ export class PropertyDetailComponent implements OnInit {
     this.web3Service.account$.subscribe(async account => {
       this.isConnected = !!account;
       this.currentAccount = account || '';
-      
+
       // Vérifier si c'est le propriétaire après chargement
       if (this.property && account) {
         this.isOwner = this.property.owner.toLowerCase() === account.toLowerCase();
@@ -69,11 +77,11 @@ export class PropertyDetailComponent implements OnInit {
       this.loading = true;
       try {
         this.property = await this.blockchainService.getProperty(parseInt(id));
-        
+
         // Vérifier si c'est le propriétaire
         if (this.currentAccount && this.property) {
           this.isOwner = this.property.owner.toLowerCase() === this.currentAccount.toLowerCase();
-          
+
           // Initialiser les données d'édition
           this.editData = {
             title: this.property.title,
@@ -82,7 +90,7 @@ export class PropertyDetailComponent implements OnInit {
             pricePerDay: this.property.pricePerDay,
             deposit: this.property.deposit
           };
-          
+
           // Charger les réservations si propriétaire
           if (this.isOwner) {
             await this.loadBookings();
@@ -98,11 +106,11 @@ export class PropertyDetailComponent implements OnInit {
 
   async loadBookings() {
     if (!this.property) return;
-    
+
     this.loadingBookings = true;
     try {
       this.bookings = [];
-      
+
       // Récupérer les IDs de location de la propriété
       for (const rentalId of this.property.rentalIds) {
         try {
@@ -112,7 +120,7 @@ export class PropertyDetailComponent implements OnInit {
           console.warn('Could not load rental', rentalId);
         }
       }
-      
+
       // Trier par date de début
       this.bookings.sort((a, b) => a.startDate - b.startDate);
     } catch (error) {
@@ -135,13 +143,82 @@ export class PropertyDetailComponent implements OnInit {
     }
   }
 
-  // Sauvegarder les modifications (Note: le contrat actuel ne supporte pas la modification)
+  // Sauvegarder les modifications
   async saveChanges() {
     alert('⚠️ La modification des propriétés n\'est pas encore supportée par le smart contract actuel. Cette fonctionnalité sera disponible dans une prochaine version.');
     this.editMode = false;
   }
 
-  // Calcul du prix total basé sur les dates
+  // ========== BLOCAGE DE DATES ==========
+
+  // Vérifier si c'est un blocage du propriétaire
+  isOwnerBooking(booking: RentalAgreement): boolean {
+    return this.property ? 
+      booking.tenant.toLowerCase() === this.property.owner.toLowerCase() : false;
+  }
+
+  // Vérifier si on peut bloquer des dates
+  canBlockDates(): boolean {
+    return !!this.blockData.startDate && 
+           !!this.blockData.endDate && 
+           new Date(this.blockData.endDate) > new Date(this.blockData.startDate);
+  }
+
+  // Bloquer des dates
+  async blockDates() {
+    if (!this.property || !this.canBlockDates()) return;
+    
+    this.processingBlock = true;
+    
+    try {
+      const startTimestamp = Math.floor(new Date(this.blockData.startDate).getTime() / 1000);
+      const endTimestamp = Math.floor(new Date(this.blockData.endDate).getTime() / 1000);
+      
+      await this.blockchainService.blockDates(this.property.id, startTimestamp, endTimestamp);
+      
+      alert('✅ Dates bloquées avec succès !');
+      this.blockData = { startDate: '', endDate: '' };
+      await this.loadBookings();
+      await this.loadProperty();
+      
+    } catch (error: any) {
+      console.error('Erreur blocage:', error);
+      alert('❌ Erreur: ' + error.message);
+    } finally {
+      this.processingBlock = false;
+    }
+  }
+
+  // Annuler une réservation (propriétaire)
+  async cancelBooking(rentalId: number) {
+    const booking = this.bookings.find(b => b.id === rentalId);
+    const isOwnerBlocking = booking && this.isOwnerBooking(booking);
+    
+    const message = isOwnerBlocking ? 
+      'Voulez-vous débloquer ces dates ?' :
+      '⚠️ Voulez-vous annuler cette réservation ?\n\nLe locataire sera remboursé du prix de la location.';
+    
+    if (!confirm(message)) return;
+    
+    this.processingCancel = rentalId;
+    
+    try {
+      await this.blockchainService.cancelRental(rentalId);
+      
+      alert(isOwnerBlocking ? '✅ Dates débloquées !' : '✅ Réservation annulée !');
+      await this.loadBookings();
+      await this.loadProperty();
+      
+    } catch (error: any) {
+      console.error('Erreur annulation:', error);
+      alert('❌ Erreur: ' + error.message);
+    } finally {
+      this.processingCancel = null;
+    }
+  }
+
+  // ========== LOCATION ==========
+
   calculateTotal() {
     if (this.rentalData.startDate && this.rentalData.endDate && this.property) {
       const start = new Date(this.rentalData.startDate);
@@ -211,7 +288,8 @@ export class PropertyDetailComponent implements OnInit {
     }
   }
 
-  // Helpers pour les réservations
+  // ========== HELPERS ==========
+
   getBookingStatusClass(booking: RentalAgreement): string {
     if (booking.isCancelled) return 'cancelled';
     if (booking.isCompleted) return 'completed';
@@ -232,6 +310,14 @@ export class PropertyDetailComponent implements OnInit {
       return 'À venir';
     }
     return 'En attente';
+  }
+
+  getActiveBookingsCount(): number {
+    return this.bookings.filter(b => b.isActive).length;
+  }
+
+  getCompletedBookingsCount(): number {
+    return this.bookings.filter(b => b.isCompleted).length;
   }
 
   formatDate(timestamp: number): string {
@@ -273,13 +359,4 @@ export class PropertyDetailComponent implements OnInit {
     nextDay.setDate(startDate.getDate() + 1);
     return nextDay.toISOString().split('T')[0];
   }
-
-  getActiveBookingsCount(): number {
-  return this.bookings.filter(b => b.isActive).length;
-}
-
-
-getCompletedBookingsCount(): number {
-  return this.bookings.filter(b => b.isCompleted).length;
-}
 }
