@@ -1,192 +1,226 @@
-import { Component, AfterViewInit, NgZone } from '@angular/core';
+import { Component, OnInit, AfterViewInit, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { BlockchainService } from '../../services/blockchain.service';
 import { Property } from '../../models/property.model';
-
-declare let L: any;
+import * as L from 'leaflet';
 
 @Component({
   selector: 'app-map-view',
   templateUrl: './map-view.component.html',
   styleUrls: ['./map-view.component.css']
 })
-export class MapViewComponent implements AfterViewInit {
-  private map: any;
+export class MapViewComponent implements OnInit, AfterViewInit {
+  private map!: L.Map;
   properties: Property[] = [];
-  loading = false;
-  error = '';
+  loading = true;
+
+  // Coordonnées des villes marocaines et françaises
+  private cityCoordinates: { [key: string]: [number, number] } = {
+    // Maroc
+    'casablanca': [33.5731, -7.5898],
+    'rabat': [34.0209, -6.8416],
+    'marrakech': [31.6295, -7.9811],
+    'fes': [34.0331, -5.0003],
+    'fès': [34.0331, -5.0003],
+    'tanger': [35.7595, -5.8340],
+    'tangier': [35.7595, -5.8340],
+    'agadir': [30.4278, -9.5981],
+    'meknes': [33.8731, -5.5407],
+    'meknès': [33.8731, -5.5407],
+    'oujda': [34.6867, -1.9114],
+    'kenitra': [34.2610, -6.5802],
+    'tetouan': [35.5889, -5.3626],
+    'tétouan': [35.5889, -5.3626],
+    'safi': [32.2994, -9.2372],
+    'mohammedia': [33.6866, -7.3830],
+    'el jadida': [33.2316, -8.5007],
+    'beni mellal': [32.3373, -6.3498],
+    'nador': [35.1681, -2.9330],
+    'taza': [34.2300, -3.9900],
+    'settat': [33.0014, -7.6200],
+    'essaouira': [31.5085, -9.7595],
+    'chefchaouen': [35.1688, -5.2636],
+    'ouarzazate': [30.9189, -6.8936],
+    'ifrane': [33.5228, -5.1109],
+    
+    // France
+    'paris': [48.8566, 2.3522],
+    'marseille': [43.2965, 5.3698],
+    'lyon': [45.7640, 4.8357],
+    'toulouse': [43.6047, 1.4442],
+    'nice': [43.7102, 7.2620],
+    'nantes': [47.2184, -1.5536],
+    'strasbourg': [48.5734, 7.7521],
+    'montpellier': [43.6108, 3.8767],
+    'bordeaux': [44.8378, -0.5792],
+    'lille': [50.6292, 3.0573],
+    'rennes': [48.1173, -1.6778],
+    'reims': [49.2583, 4.0317],
+    'le havre': [49.4944, 0.1079],
+    'grenoble': [45.1885, 5.7245],
+    'dijon': [47.3220, 5.0415],
+    'angers': [47.4784, -0.5632],
+    'cannes': [43.5528, 7.0174]
+  };
 
   // Images pour les propriétés
   private propertyImages = [
-    'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=400&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=300&fit=crop'
+    'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=300&h=200&fit=crop',
+    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=300&h=200&fit=crop',
+    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=300&h=200&fit=crop',
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&h=200&fit=crop',
+    'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=300&h=200&fit=crop',
+    'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=300&h=200&fit=crop'
   ];
+
+  // Track used coordinates to avoid overlap
+  private usedCoordinates: Map<string, number> = new Map();
 
   constructor(
     private blockchainService: BlockchainService,
     private router: Router,
     private ngZone: NgZone
-  ) {
-    // Exposer la méthode de navigation globalement pour les popups
-    (window as any).navigateToProperty = (id: number) => {
-      this.ngZone.run(() => {
-        this.router.navigate(['/property', id]);
-      });
-    };
-  }
+  ) {}
 
-  async ngAfterViewInit() {
-    await this.initMap();
+  async ngOnInit() {
     await this.loadProperties();
   }
 
-  private getPropertyImage(propertyId: number): string {
-    return this.propertyImages[propertyId % this.propertyImages.length];
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.initMap();
+    }, 100);
   }
 
-  private async loadProperties(): Promise<void> {
+  private initMap() {
+    // Centrer sur le Maroc par défaut
+    this.map = L.map('map', {
+      center: [31.7917, -7.0926],
+      zoom: 6
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(this.map);
+
+    // Ajouter les marqueurs
+    this.addPropertyMarkers();
+  }
+
+  async loadProperties() {
     this.loading = true;
     try {
       this.properties = await this.blockchainService.getAvailableProperties();
-      if (this.properties.length > 0) {
-        this.addPropertyMarkers();
+    } catch (error) {
+      console.error('Error loading properties:', error);
+    }
+    this.loading = false;
+  }
+
+  private getCoordinatesForLocation(location: string, propertyId: number): [number, number] {
+    const locationLower = location.toLowerCase().trim();
+    
+    // Chercher une correspondance dans les villes connues
+    for (const [city, coords] of Object.entries(this.cityCoordinates)) {
+      if (locationLower.includes(city)) {
+        // Ajouter un décalage pour éviter la superposition
+        const key = city;
+        const count = this.usedCoordinates.get(key) || 0;
+        this.usedCoordinates.set(key, count + 1);
+        
+        // Décalage en spirale pour mieux répartir les marqueurs
+        const angle = count * 0.8;
+        const radius = 0.002 + (count * 0.001);
+        const offsetLat = Math.cos(angle) * radius;
+        const offsetLng = Math.sin(angle) * radius;
+        
+        return [coords[0] + offsetLat, coords[1] + offsetLng];
       }
-    } catch (error) {
-      console.error('Erreur:', error);
-      this.error = 'Impossible de charger les propriétés';
-    } finally {
-      this.loading = false;
     }
+    
+    // Si pas de correspondance, générer des coordonnées au Maroc
+    const baseLat = 32 + (propertyId * 0.5) % 4;
+    const baseLng = -7 + (propertyId * 0.3) % 3;
+    return [baseLat, baseLng];
   }
 
-  private async initMap(): Promise<void> {
-    try {
-      // Configuration des icônes
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-      });
-
-      // Création de la carte (centré sur le Maroc/France)
-      this.map = L.map('map').setView([40.0, 0.0], 4);
-
-      // Ajout des tuiles OpenStreetMap
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(this.map);
-
-    } catch (error) {
-      console.error('Erreur carte:', error);
-      this.error = 'Erreur lors du chargement de la carte';
-    }
+  private createPriceIcon(price: number): L.DivIcon {
+    return L.divIcon({
+      className: 'price-marker',
+      html: `<div class="price-tag">${price} ETH</div>`,
+      iconSize: [80, 36],
+      iconAnchor: [40, 36]
+    });
   }
 
-  private addPropertyMarkers(): void {
-    const bounds: [number, number][] = [];
+  private addPropertyMarkers() {
+    if (!this.map) return;
 
-    this.properties.forEach(property => {
-      const coords = this.getCoordinates(property.location);
+    // Reset used coordinates
+    this.usedCoordinates.clear();
 
-      if (coords) {
-        bounds.push(coords);
-        const imageUrl = this.getPropertyImage(property.id);
+    this.properties.forEach((property) => {
+      const coords = this.getCoordinatesForLocation(property.location, property.id);
+      
+      // Créer un marqueur avec le prix
+      const priceIcon = this.createPriceIcon(property.pricePerDay);
+      
+      const marker = L.marker(coords, { icon: priceIcon }).addTo(this.map);
 
-        const popupContent = `
-          <div style="min-width: 250px; font-family: 'Inter', sans-serif;">
-            <img src="${imageUrl}" 
-                 alt="${property.title}" 
-                 style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px 8px 0 0; margin: -13px -13px 10px -13px; width: calc(100% + 26px);">
-            <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">
-              ${property.title}
-            </h4>
-            <p style="margin: 0 0 8px 0; color: #10b981; font-weight: 700; font-size: 18px;">
-              ${property.pricePerDay} ETH<span style="font-size: 12px; color: #6b7280; font-weight: 400;">/jour</span>
-            </p>
-            <p style="margin: 0 0 12px 0; color: #6b7280; font-size: 13px;">
-              📍 ${property.location}
-            </p>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid #e5e7eb; margin-bottom: 12px;">
-              <span style="font-size: 12px; color: #9ca3af;">Dépôt</span>
-              <span style="font-size: 12px; font-weight: 600; color: #374151;">${property.deposit} ETH</span>
+      // Image de la propriété
+      const imageUrl = this.propertyImages[property.id % this.propertyImages.length];
+
+      // Popup avec les détails
+      const popupContent = `
+        <div class="map-popup">
+          <img src="${imageUrl}" alt="${property.title}" class="popup-image">
+          <div class="popup-content">
+            <h3 class="popup-title">${property.title}</h3>
+            <p class="popup-location">📍 ${property.location}</p>
+            <div class="popup-price">
+              <span class="price-value">${property.pricePerDay} ETH</span>
+              <span class="price-unit">/jour</span>
             </div>
-            <button onclick="navigateToProperty(${property.id})"
-                    style="
-                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                      color: white;
-                      border: none;
-                      padding: 10px 16px;
-                      border-radius: 8px;
-                      cursor: pointer;
-                      width: 100%;
-                      font-weight: 600;
-                      font-size: 14px;
-                      transition: transform 0.2s, box-shadow 0.2s;
-                    "
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)';"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-              🔑 Voir les détails
+            <p class="popup-deposit">Dépôt: ${property.deposit} ETH</p>
+            <button class="popup-btn" onclick="window.navigateToProperty(${property.id})">
+              Voir les détails →
             </button>
           </div>
-        `;
+        </div>
+      `;
 
-        L.marker(coords)
-          .addTo(this.map)
-          .bindPopup(popupContent, {
-            maxWidth: 280,
-            className: 'custom-popup'
-          });
-      }
+      marker.bindPopup(popupContent, {
+        maxWidth: 280,
+        className: 'custom-popup'
+      });
+
+      // Effet hover sur le marqueur
+      marker.on('mouseover', function() {
+        this.openPopup();
+      });
     });
 
-    // Ajuster la vue pour montrer tous les marqueurs
-    if (bounds.length > 0) {
-      this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 10 });
-    }
-  }
-
-  private getCoordinates(location: string): [number, number] | null {
-    const locations: { [key: string]: [number, number] } = {
-      // Maroc
-      'casablanca': [33.5731, -7.5898],
-      'rabat': [34.0209, -6.8416],
-      'marrakech': [31.6295, -7.9811],
-      'fes': [34.0331, -5.0003],
-      'tanger': [35.7595, -5.8340],
-      'agadir': [30.4278, -9.5981],
-      'meknes': [33.8935, -5.5547],
-      'oujda': [34.6867, -1.9114],
-      // France
-      'paris': [48.8566, 2.3522],
-      'lyon': [45.7640, 4.8357],
-      'marseille': [43.2965, 5.3698],
-      'toulouse': [43.6047, 1.4442],
-      'nice': [43.7102, 7.2620],
-      'nantes': [47.2184, -1.5536],
-      'bordeaux': [44.8378, -0.5792],
-      'lille': [50.6292, 3.0573]
+    // Fonction globale pour la navigation
+    (window as any).navigateToProperty = (propertyId: number) => {
+      this.ngZone.run(() => {
+        this.router.navigate(['/property', propertyId]);
+      });
     };
 
-    const lowerLocation = location.toLowerCase();
-
-    for (const [key, coords] of Object.entries(locations)) {
-      if (lowerLocation.includes(key)) {
-        return coords;
-      }
+    // Ajuster la vue pour montrer tous les marqueurs
+    if (this.properties.length > 0) {
+      const bounds = L.latLngBounds(
+        this.properties.map(p => this.getCoordinatesForLocation(p.location, p.id))
+      );
+      
+      // Reset pour recalculer
+      this.usedCoordinates.clear();
+      
+      this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
     }
-
-    // Coordonnées par défaut (centre Europe/Maroc)
-    return [
-      35.0 + Math.random() * 10.0,
-      -5.0 + Math.random() * 10.0
-    ];
   }
 
-  switchToListView(): void {
+  goBack() {
     this.router.navigate(['/properties']);
   }
 }

@@ -1,20 +1,14 @@
-<div class="simple-map">
-  <div class="header">
-    <h2>Carte des Propriétés</h2>
-    <button class="btn-list" (click)="switchToListView()">
-      Voir la liste
+<div class="map-container">
+  <div class="map-header">
+    <h1>🗺️ Carte des propriétés</h1>
+    <button class="btn btn-glass" (click)="goBack()">
+      ← Retour à la liste
     </button>
   </div>
-
-  <div class="map-container">
-    <div id="map"></div>
-  </div>
-
-  <div *ngIf="loading" class="loading">
-    Chargement de la carte...
-  </div>
-
-  <div *ngIf="error" class="error">
-    {{ error }}
+  
+  <div id="map"></div>
+  
+  <div *ngIf="loading" class="loading-overlay">
+    <p>Chargement des propriétés...</p>
   </div>
 </div>
