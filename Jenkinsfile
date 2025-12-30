@@ -85,10 +85,7 @@ spec:
                 sh '''
                 for service in service-discovery api-gateway user-service property-service rental-service payment-service blockchain-integration-service; do
                     echo "Pushing $service image..."
-                    /kaniko/executor \
-                        --context `pwd`/backend/$service \
-                        --dockerfile `pwd`/backend/$service/Dockerfile \
-                        --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/$service:latest
+                    /kaniko/executor --context `pwd`/backend/$service --dockerfile `pwd`/backend/$service/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/$service:latest
                 done
                 '''
             }
@@ -98,10 +95,7 @@ spec:
             container('kaniko') {
                 sh '''
                 echo "Pushing ai-service image..."
-                /kaniko/executor \
-                    --context `pwd`/backend/ai-service \
-                    --dockerfile `pwd`/backend/ai-service/Dockerfile \
-                    --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/ai-service:latest
+                /kaniko/executor --context `pwd`/backend/ai-service --dockerfile `pwd`/backend/ai-service/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/ai-service:latest
                 '''
             }
         }
@@ -119,10 +113,7 @@ spec:
         stage('Push Frontend Image') {
             container('kaniko') {
                 sh '''
-                /kaniko/executor \
-                    --context `pwd`/frontend \
-                    --dockerfile `pwd`/frontend/Dockerfile \
-                    --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/frontend:latest
+                /kaniko/executor --context `pwd`/frontend --dockerfile `pwd`/frontend/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/frontend:latest
                 '''
             }
         }
