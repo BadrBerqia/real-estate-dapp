@@ -23,13 +23,77 @@
              name="location" required>
     </div>
 
+    <!-- Section IA - Estimation de prix -->
+    <div class="ai-section">
+      <div class="ai-header">
+        <h3>🤖 Estimation IA du prix</h3>
+        <p>Renseignez les caractéristiques pour obtenir une estimation</p>
+      </div>
+
+      <div class="ai-inputs">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="surface">Surface (m²)</label>
+            <input type="number" id="surface" [(ngModel)]="aiData.surface" 
+                   name="surface" min="10" max="500">
+          </div>
+          <div class="form-group">
+            <label for="rooms">Nombre de pièces</label>
+            <input type="number" id="rooms" [(ngModel)]="aiData.rooms" 
+                   name="rooms" min="1" max="20">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="location_score">Score localisation (1-10)</label>
+            <input type="number" id="location_score" [(ngModel)]="aiData.location_score" 
+                   name="location_score" min="1" max="10" step="0.1">
+          </div>
+          <div class="form-group">
+            <label for="distance_center">Distance centre-ville (km)</label>
+            <input type="number" id="distance_center" [(ngModel)]="aiData.distance_center" 
+                   name="distance_center" min="0" max="50" step="0.5">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="season_index">Indice saisonnier</label>
+            <select id="season_index" [(ngModel)]="aiData.season_index" name="season_index">
+              <option [value]="0.8">Basse saison (0.8)</option>
+              <option [value]="1.0">Moyenne saison (1.0)</option>
+              <option [value]="1.2">Haute saison (1.2)</option>
+            </select>
+          </div>
+          <div class="form-group ai-button-group">
+            <button type="button" class="btn btn-ai" (click)="predictPrice()" 
+                    [disabled]="loadingPrediction">
+              {{ loadingPrediction ? '⏳ Calcul...' : '🔮 Estimer le prix' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Résultat de la prédiction -->
+      <div class="ai-result" *ngIf="suggestedPrice !== null">
+        <div class="suggested-price">
+          <span class="price-label">Prix suggéré :</span>
+          <span class="price-value">{{ suggestedPrice }} €/mois</span>
+          <span class="price-eth">≈ {{ (suggestedPrice / 3000).toFixed(4) }} ETH/jour</span>
+        </div>
+        <button type="button" class="btn btn-success" (click)="applySuggestedPrice()">
+          ✓ Appliquer ce prix
+        </button>
+      </div>
+    </div>
+
     <div class="form-row">
       <div class="form-group">
         <label for="pricePerDay">Prix par jour (ETH) *</label>
         <input type="number" id="pricePerDay" [(ngModel)]="propertyData.pricePerDay" 
                name="pricePerDay" required min="0.001" step="0.001">
       </div>
-
       <div class="form-group">
         <label for="deposit">Dépôt de garantie (ETH)</label>
         <input type="number" id="deposit" [(ngModel)]="propertyData.deposit" 
