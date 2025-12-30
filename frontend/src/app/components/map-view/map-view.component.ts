@@ -94,7 +94,6 @@ export class MapViewComponent implements OnInit, AfterViewInit {
   }
 
   private initMap() {
-    // Centrer sur le Maroc par défaut
     this.map = L.map('map', {
       center: [31.7917, -7.0926],
       zoom: 6
@@ -104,7 +103,6 @@ export class MapViewComponent implements OnInit, AfterViewInit {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
 
-    // Ajouter les marqueurs
     this.addPropertyMarkers();
   }
 
@@ -121,15 +119,12 @@ export class MapViewComponent implements OnInit, AfterViewInit {
   private getCoordinatesForLocation(location: string, propertyId: number): [number, number] {
     const locationLower = location.toLowerCase().trim();
     
-    // Chercher une correspondance dans les villes connues
     for (const [city, coords] of Object.entries(this.cityCoordinates)) {
       if (locationLower.includes(city)) {
-        // Ajouter un décalage pour éviter la superposition
         const key = city;
         const count = this.usedCoordinates.get(key) || 0;
         this.usedCoordinates.set(key, count + 1);
         
-        // Décalage en spirale pour mieux répartir les marqueurs
         const angle = count * 0.8;
         const radius = 0.002 + (count * 0.001);
         const offsetLat = Math.cos(angle) * radius;
@@ -139,7 +134,6 @@ export class MapViewComponent implements OnInit, AfterViewInit {
       }
     }
     
-    // Si pas de correspondance, générer des coordonnées au Maroc
     const baseLat = 32 + (propertyId * 0.5) % 4;
     const baseLng = -7 + (propertyId * 0.3) % 3;
     return [baseLat, baseLng];
@@ -157,21 +151,17 @@ export class MapViewComponent implements OnInit, AfterViewInit {
   private addPropertyMarkers() {
     if (!this.map) return;
 
-    // Reset used coordinates
     this.usedCoordinates.clear();
 
     this.properties.forEach((property) => {
       const coords = this.getCoordinatesForLocation(property.location, property.id);
       
-      // Créer un marqueur avec le prix
       const priceIcon = this.createPriceIcon(property.pricePerDay);
       
       const marker = L.marker(coords, { icon: priceIcon }).addTo(this.map);
 
-      // Image de la propriété
       const imageUrl = this.propertyImages[property.id % this.propertyImages.length];
 
-      // Popup avec les détails
       const popupContent = `
         <div class="map-popup">
           <img src="${imageUrl}" alt="${property.title}" class="popup-image">
@@ -195,22 +185,16 @@ export class MapViewComponent implements OnInit, AfterViewInit {
         className: 'custom-popup'
       });
 
-      // Effet hover sur le marqueur
-      marker.on('mouseover', function(this: any) {
-        this.openPopup();
-      });
+      // Supprimé: le hover - maintenant seulement au clic
     });
 
-    // Fonction globale pour la navigation
     (window as any).navigateToProperty = (propertyId: number) => {
       this.ngZone.run(() => {
         this.router.navigate(['/property', propertyId]);
       });
     };
 
-    // Ajuster la vue pour montrer tous les marqueurs
     if (this.properties.length > 0) {
-      // Reset pour recalculer
       this.usedCoordinates.clear();
       
       const bounds = L.latLngBounds(

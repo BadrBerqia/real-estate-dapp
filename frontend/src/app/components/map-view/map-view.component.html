@@ -1,6 +1,11 @@
 <div class="map-container">
   <div class="map-header">
     <h1>🗺️ Carte des propriétés</h1>
+    
+    <div class="map-stats">
+      <span class="stat-item"><strong>{{ properties.length }}</strong> propriétés</span>
+    </div>
+    
     <button class="btn btn-glass" (click)="goBack()">
       ← Retour à la liste
     </button>
