@@ -70,7 +70,7 @@ spec:
             container('maven') {
                 sh '''
                 cd backend
-                for service in service-discovery api-gateway user-service property-service rental-service payment-service blockchain-integration-service; do
+                for service in service-discovery api-gateway user-service property-service; do
                     echo "Building $service..."
                     cd $service
                     mvn clean package -DskipTests -q
@@ -86,9 +86,6 @@ spec:
                 sh 'echo "Pushing api-gateway..." && /kaniko/executor --context `pwd`/backend/api-gateway --dockerfile `pwd`/backend/api-gateway/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/api-gateway:latest'
                 sh 'echo "Pushing user-service..." && /kaniko/executor --context `pwd`/backend/user-service --dockerfile `pwd`/backend/user-service/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/user-service:latest'
                 sh 'echo "Pushing property-service..." && /kaniko/executor --context `pwd`/backend/property-service --dockerfile `pwd`/backend/property-service/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/property-service:latest'
-                sh 'echo "Pushing rental-service..." && /kaniko/executor --context `pwd`/backend/rental-service --dockerfile `pwd`/backend/rental-service/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/rental-service:latest'
-                sh 'echo "Pushing payment-service..." && /kaniko/executor --context `pwd`/backend/payment-service --dockerfile `pwd`/backend/payment-service/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/payment-service:latest'
-                sh 'echo "Pushing blockchain-integration-service..." && /kaniko/executor --context `pwd`/backend/blockchain-integration-service --dockerfile `pwd`/backend/blockchain-integration-service/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/blockchain-integration-service:latest'
             }
         }
 
@@ -124,18 +121,12 @@ spec:
                 kubectl apply -f k8s/backend/api-gateway.yaml
                 kubectl apply -f k8s/backend/user-service.yaml
                 kubectl apply -f k8s/backend/property-service.yaml
-                kubectl apply -f k8s/backend/rental-service.yaml
-                kubectl apply -f k8s/backend/payment-service.yaml
-                kubectl apply -f k8s/backend/blockchain-service.yaml
                 kubectl apply -f k8s/ai-service.yaml
                 kubectl apply -f k8s/frontend.yaml
                 kubectl rollout restart deployment/service-discovery
                 kubectl rollout restart deployment/api-gateway
                 kubectl rollout restart deployment/user-service
                 kubectl rollout restart deployment/property-service
-                kubectl rollout restart deployment/rental-service
-                kubectl rollout restart deployment/payment-service
-                kubectl rollout restart deployment/blockchain-service
                 kubectl rollout restart deployment/ai-service
                 kubectl rollout restart deployment/real-estate-frontend
                 '''
