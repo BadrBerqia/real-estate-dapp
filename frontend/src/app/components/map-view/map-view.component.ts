@@ -2,7 +2,8 @@ import { Component, OnInit, AfterViewInit, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { BlockchainService } from '../../services/blockchain.service';
 import { Property } from '../../models/property.model';
-import * as L from 'leaflet';
+
+declare const L: any;
 
 @Component({
   selector: 'app-map-view',
@@ -10,7 +11,7 @@ import * as L from 'leaflet';
   styleUrls: ['./map-view.component.css']
 })
 export class MapViewComponent implements OnInit, AfterViewInit {
-  private map!: L.Map;
+  private map: any;
   properties: Property[] = [];
   loading = true;
 
@@ -144,7 +145,7 @@ export class MapViewComponent implements OnInit, AfterViewInit {
     return [baseLat, baseLng];
   }
 
-  private createPriceIcon(price: number): L.DivIcon {
+  private createPriceIcon(price: number): any {
     return L.divIcon({
       className: 'price-marker',
       html: `<div class="price-tag">${price} ETH</div>`,
@@ -195,7 +196,7 @@ export class MapViewComponent implements OnInit, AfterViewInit {
       });
 
       // Effet hover sur le marqueur
-      marker.on('mouseover', function() {
+      marker.on('mouseover', function(this: any) {
         this.openPopup();
       });
     });
@@ -209,12 +210,12 @@ export class MapViewComponent implements OnInit, AfterViewInit {
 
     // Ajuster la vue pour montrer tous les marqueurs
     if (this.properties.length > 0) {
-      const bounds = L.latLngBounds(
-        this.properties.map(p => this.getCoordinatesForLocation(p.location, p.id))
-      );
-      
       // Reset pour recalculer
       this.usedCoordinates.clear();
+      
+      const bounds = L.latLngBounds(
+        this.properties.map((p: Property) => this.getCoordinatesForLocation(p.location, p.id))
+      );
       
       this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
     }
