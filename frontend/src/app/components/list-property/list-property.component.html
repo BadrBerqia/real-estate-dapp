@@ -75,16 +75,17 @@
         </div>
       </div>
 
-    <!-- Résultat de la prédiction -->
-    <div class="ai-result" *ngIf="suggestedPrice !== null">
-      <div class="suggested-price">
-        <span class="price-label">Prix suggéré :</span>
-        <span class="price-value">{{ (suggestedPrice / 30).toFixed(2) }} €/nuit</span>
-        <span class="price-eth">≈ {{ (suggestedPrice / 30 / 3400).toFixed(4) }} ETH/nuit</span>
+      <!-- Résultat de la prédiction -->
+      <div class="ai-result" *ngIf="suggestedPrice !== null">
+        <div class="suggested-price">
+          <span class="price-label">Prix suggéré :</span>
+          <span class="price-value">{{ (suggestedPrice / 30).toFixed(2) }} €/nuit</span>
+          <span class="price-eth">≈ {{ (suggestedPrice / 30 / 3400).toFixed(4) }} ETH/nuit</span>
+        </div>
+        <button type="button" class="btn btn-success" (click)="applySuggestedPrice()">
+          ✓ Appliquer ce prix
+        </button>
       </div>
-      <button type="button" class="btn btn-success" (click)="applySuggestedPrice()">
-        ✓ Appliquer ce prix
-      </button>
     </div>
 
     <div class="form-row">
