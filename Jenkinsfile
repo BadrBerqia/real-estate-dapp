@@ -68,59 +68,59 @@ spec:
 
         stage('Build Microservices') {
             container('maven') {
-                sh '''
+                sh """
                 cd backend
                 for service in service-discovery api-gateway user-service property-service rental-service payment-service blockchain-integration-service; do
-                    echo "Building $service..."
-                    cd $service
+                    echo "Building \$service..."
+                    cd \$service
                     mvn clean package -DskipTests -q
                     cd ..
                 done
-                '''
+                """
             }
         }
 
         stage('Push Microservices Images') {
             container('kaniko') {
-                sh '''
+                sh """
                 for service in service-discovery api-gateway user-service property-service rental-service payment-service blockchain-integration-service; do
-                    echo "Pushing $service image..."
-                    /kaniko/executor --context `pwd`/backend/$service --dockerfile `pwd`/backend/$service/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/$service:latest
+                    echo "Pushing \$service image..."
+                    /kaniko/executor --context \`pwd\`/backend/\$service --dockerfile \`pwd\`/backend/\$service/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/\$service:latest
                 done
-                '''
+                """
             }
         }
 
         stage('Push AI Service Image') {
             container('kaniko') {
-                sh '''
+                sh """
                 echo "Pushing ai-service image..."
-                /kaniko/executor --context `pwd`/backend/ai-service --dockerfile `pwd`/backend/ai-service/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/ai-service:latest
-                '''
+                /kaniko/executor --context \`pwd\`/backend/ai-service --dockerfile \`pwd\`/backend/ai-service/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/ai-service:latest
+                """
             }
         }
 
         stage('Build Frontend') {
             container('node') {
-                sh '''
+                sh """
                 cd frontend
                 npm install
                 npm run build
-                '''
+                """
             }
         }
 
         stage('Push Frontend Image') {
             container('kaniko') {
-                sh '''
-                /kaniko/executor --context `pwd`/frontend --dockerfile `pwd`/frontend/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/frontend:latest
-                '''
+                sh """
+                /kaniko/executor --context \`pwd\`/frontend --dockerfile \`pwd\`/frontend/Dockerfile --destination us-central1-docker.pkg.dev/real-estate-dapp-jee/jee-repo/frontend:latest
+                """
             }
         }
 
         stage('Deploy to Kubernetes') {
             container('gcloud') {
-                sh '''
+                sh """
                 kubectl apply -f k8s/backend/postgres.yaml
                 kubectl wait --for=condition=available --timeout=120s deployment/postgres || true
                 kubectl apply -f k8s/backend/service-discovery.yaml
@@ -142,7 +142,7 @@ spec:
                 kubectl rollout restart deployment/blockchain-service
                 kubectl rollout restart deployment/ai-service
                 kubectl rollout restart deployment/real-estate-frontend
-                '''
+                """
             }
         }
     }
