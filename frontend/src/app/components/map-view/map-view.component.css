@@ -59,10 +59,136 @@
   transform: translate(-50%, -50%);
   background: white;
   padding: 2rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xl);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   text-align: center;
   z-index: 1000;
+}
+
+/* ========================================
+   PRICE MARKERS - Airbnb Style
+======================================== */
+
+::ng-deep .price-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+::ng-deep .price-tag {
+  background: white;
+  color: #1f2937;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  border: 2px solid white;
+  cursor: pointer;
+  display: inline-block;
+}
+
+::ng-deep .price-tag:hover {
+  background: #1f2937;
+  color: white;
+  transform: scale(1.1);
+}
+
+::ng-deep .leaflet-marker-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* ========================================
+   POPUP STYLES
+======================================== */
+
+::ng-deep .custom-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+::ng-deep .custom-popup .leaflet-popup-content {
+  margin: 0;
+  width: 260px !important;
+}
+
+::ng-deep .custom-popup .leaflet-popup-tip {
+  background: white;
+}
+
+::ng-deep .map-popup {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+::ng-deep .popup-image {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+::ng-deep .popup-content {
+  padding: 1rem;
+}
+
+::ng-deep .popup-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+}
+
+::ng-deep .popup-location {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0 0 0.75rem 0;
+}
+
+::ng-deep .popup-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+::ng-deep .popup-price .price-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+::ng-deep .popup-price .price-unit {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+::ng-deep .popup-deposit {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0 0 1rem 0;
+}
+
+::ng-deep .popup-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #5a67d8 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+::ng-deep .popup-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 /* ========================================
@@ -82,5 +208,10 @@
   
   .map-stats {
     display: none;
+  }
+  
+  ::ng-deep .price-tag {
+    font-size: 12px;
+    padding: 6px 10px;
   }
 }
