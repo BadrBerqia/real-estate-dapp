@@ -62,8 +62,9 @@ export class ListPropertyComponent {
 
   applySuggestedPrice() {
     if (this.suggestedPrice) {
-      // Convertir EUR en ETH (approximatif: 1 ETH ≈ 3000 EUR)
-      const ethPrice = this.suggestedPrice / 3000;
+      // Convertir EUR/mois en ETH/jour (1 ETH ≈ 3400 EUR)
+      const pricePerDay = this.suggestedPrice / 30;
+      const ethPrice = pricePerDay / 3400;
       this.propertyData.pricePerDay = parseFloat(ethPrice.toFixed(4));
     }
   }
