@@ -11,9 +11,25 @@ import { Property } from '../../models/property.model';
 })
 export class PropertyListComponent implements OnInit {
   properties: Property[] = [];
-  loading = false;
-  error = '';
+  filteredProperties: Property[] = [];
+  loading = true;
   isConnected = false;
+
+  // Filtres
+  searchTerm = '';
+  filterLocation = '';
+  filterMinPrice: number | null = null;
+  filterMaxPrice: number | null = null;
+
+  // Images pour les propriétés
+  private propertyImages = [
+    'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=300&fit=crop',
+    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=300&fit=crop',
+    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=300&fit=crop',
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=300&fit=crop',
+    'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=400&h=300&fit=crop',
+    'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=300&fit=crop'
+  ];
 
   constructor(
     private blockchainService: BlockchainService,
@@ -22,70 +38,78 @@ export class PropertyListComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    await this.loadProperties();
-    
     this.web3Service.account$.subscribe(account => {
       this.isConnected = !!account;
     });
+
+    await this.loadProperties();
   }
 
   async loadProperties() {
     this.loading = true;
-    this.error = '';
-    
     try {
       this.properties = await this.blockchainService.getAvailableProperties();
+      this.filteredProperties = this.properties;
     } catch (error) {
-      console.error('Erreur chargement propriétés:', error);
-      this.error = 'Erreur lors du chargement des propriétés';
-    } finally {
-      this.loading = false;
+      console.error('Erreur:', error);
     }
+    this.loading = false;
   }
 
-  getPropertyImage(propertyId: number): string {
-    const images = [
-      'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400',
-      'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400',
-      'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400',
-      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400'
-    ];
-    return images[propertyId % images.length];
+  // ========== FILTRES ==========
+
+  applyFilters() {
+    this.filteredProperties = this.properties.filter(property => {
+      // Filtre par recherche (titre ou description)
+      const matchesSearch = !this.searchTerm || 
+        property.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        property.description?.toLowerCase().includes(this.searchTerm.toLowerCase());
+      
+      // Filtre par localisation
+      const matchesLocation = !this.filterLocation || 
+        property.location.toLowerCase().includes(this.filterLocation.toLowerCase());
+      
+      // Filtre par prix min
+      const matchesMinPrice = !this.filterMinPrice || 
+        property.pricePerDay >= this.filterMinPrice;
+      
+      // Filtre par prix max
+      const matchesMaxPrice = !this.filterMaxPrice || 
+        property.pricePerDay <= this.filterMaxPrice;
+      
+      return matchesSearch && matchesLocation && matchesMinPrice && matchesMaxPrice;
+    });
   }
+
+  resetFilters() {
+    this.searchTerm = '';
+    this.filterLocation = '';
+    this.filterMinPrice = null;
+    this.filterMaxPrice = null;
+    this.filteredProperties = this.properties;
+  }
+
+  // ========== NAVIGATION ==========
 
   viewProperty(propertyId: number) {
     this.router.navigate(['/property', propertyId]);
   }
 
   rentProperty(property: Property) {
-    if (!this.isConnected) {
-      alert('Veuillez connecter MetaMask pour louer une propriété');
-      return;
-    }
-    this.viewProperty(property.id);
-  }
-
-  goToMap() {
-    this.router.navigate(['/properties/map']);
+    this.router.navigate(['/property', property.id]);
   }
 
   goToListProperty() {
-    if (!this.isConnected) {
-      alert('Veuillez connecter MetaMask pour lister une propriété');
-      return;
-    }
     this.router.navigate(['/list-property']);
   }
 
-  goToMyProperties() {
-    this.router.navigate(['/my-properties']);
+  goToMap() {
+    this.router.navigate(['/map']);
   }
 
-  goToMyRentals() {
-    this.router.navigate(['/my-rentals']);
-  }
+  // ========== HELPERS ==========
 
-  goToProfile() {
-    this.router.navigate(['/profile']);
+  getPropertyImage(propertyId: number): string {
+    return this.propertyImages[propertyId % this.propertyImages.length];
   }
 }

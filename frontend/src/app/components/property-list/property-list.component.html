@@ -45,6 +45,59 @@
     </div>
   </section>
 
+  <!-- Search & Filters Section -->
+  <section class="filters-section">
+    <div class="filters-container">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" 
+               [(ngModel)]="searchTerm" 
+               (input)="applyFilters()"
+               placeholder="Rechercher une propriété..."
+               class="search-input">
+      </div>
+      
+      <div class="filters-row">
+        <div class="filter-group">
+          <label>📍 Localisation</label>
+          <input type="text" 
+                 [(ngModel)]="filterLocation" 
+                 (input)="applyFilters()"
+                 placeholder="Ville..."
+                 class="filter-input">
+        </div>
+        
+        <div class="filter-group">
+          <label>💰 Prix min (ETH)</label>
+          <input type="number" 
+                 [(ngModel)]="filterMinPrice" 
+                 (input)="applyFilters()"
+                 placeholder="0"
+                 step="0.001"
+                 class="filter-input">
+        </div>
+        
+        <div class="filter-group">
+          <label>💰 Prix max (ETH)</label>
+          <input type="number" 
+                 [(ngModel)]="filterMaxPrice" 
+                 (input)="applyFilters()"
+                 placeholder="0"
+                 step="0.001"
+                 class="filter-input">
+        </div>
+        
+        <button class="btn btn-outline" (click)="resetFilters()">
+          🔄 Réinitialiser
+        </button>
+      </div>
+      
+      <div class="results-count">
+        {{ filteredProperties.length }} propriété(s) trouvée(s)
+      </div>
+    </div>
+  </section>
+
   <!-- Connection Notice -->
   <div *ngIf="!isConnected" class="connect-banner">
     <span class="connect-icon">🦊</span>
@@ -68,26 +121,243 @@
       <p>Chargement des propriétés depuis la blockchain...</p>
     </div>
 
-    <!-- Error State -->
-    <div *ngIf="error" class="error-state">
-      <span class="error-icon">⚠️</span>
-      <p>{{ error }}</p>
-      <button class="btn btn-primary" (click)="loadProperties()">Réessayer</button>
-    </div>
-
     <!-- Empty State -->
-    <div *ngIf="properties.length === 0 && !loading && !error" class="empty-state">
+    <div *ngIf="filteredProperties.length === 0 && !loading" class="empty-state">
       <div class="empty-icon">🏗️</div>
-      <h3>Aucune propriété disponible</h3>
-      <p>Soyez le premier à lister une propriété sur la blockchain !</p>
-      <button *ngIf="isConnected" class="btn btn-primary btn-lg" (click)="goToListProperty()">
+      <h3>Aucune propriété trouvée</h3>
+      <p *ngIf="searchTerm || filterLocation || filterMinPrice || filterMaxPrice">
+        Essayez de modifier vos critères de recherche
+      </p>
+      <p *ngIf="!searchTerm && !filterLocation && !filterMinPrice && !filterMaxPrice">
+        Soyez le premier à lister une propriété sur la blockchain !
+      </p>
+      <button *ngIf="isConnected && !searchTerm && !filterLocation" class="btn btn-primary btn-lg" (click)="goToListProperty()">
         ✨ Publier la première propriété
+      </button>
+      <button *ngIf="searchTerm || filterLocation || filterMinPrice || filterMaxPrice" class="btn btn-secondary" (click)="resetFilters()">
+        🔄 Réinitialiser les filtres
       </button>
     </div>
 
     <!-- Properties Grid -->
-    <div *ngIf="properties.length > 0" class="properties-grid">
-      <div *ngFor="let property of properties; let i = index" 
+    <div *ngIf="filteredProperties.length > 0" class="properties-grid">
+      <div *ngFor="let property of filteredProperties; let i = index" 
+           class="property-card animate-fade-in"
+           [style.animation-delay]="i * 0.1 + 's'"
+           (click)="viewProperty(property.id)">
+        
+        <div class="card-image">
+          <img [src]="getPropertyImage(property.id)" [alt]="property.title">
+          <div class="card-badge" [class.available]="property.isAvailable">
+            {{ property.isAvailable ? '✅ Disponible' : '🔒 Occupée' }}
+          </div>
+          <div class="card-price-tag">
+            <span class="price-value">{{ property.pricePerDay }}</span>
+            <span class="price-unit">ETH/jour</span>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <h3 class="card-title">{{ property.title }}</h3>
+          <p class="card-location">
+            <span class="location-icon">📍</span>
+            {{ property.location }}
+          </p>
+          <p class="card-description">
+            {{ property.description || 'Magnifique propriété disponible à la location' }}
+          </p>
+
+          <div class="card-details">
+            <div class="detail-item">
+              <span class="detail-label">Dépôt</span>
+              <span class="detail-value">{{ property.deposit }} ETH</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">ID</span>
+              <span class="detail-value">#{{ property.id }}</span>
+            </div>
+          </div>
+
+          <button class="btn btn-primary card-btn"
+                  (click)="$event.stopPropagation(); rentProperty(property)"
+                  [disabled]="!property.isAvailable || !isConnected">
+            {{ !isConnected ? '🔗 Connectez-vous' : (property.isAvailable ? '🔑 Louer maintenant' : '❌ Indisponible') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <h2>Pourquoi BlockEstate ?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🔐</span>
+        <h3>Sécurisé</h3>
+        <p>Transactions sécurisées par smart contracts sur Ethereum</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">💎</span>
+        <h3>Transparent</h3>
+        <p>Toutes les transactions sont visibles sur la blockchain</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <h3>Rapide</h3>
+        <p>Locations instantanées sans intermédiaire</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🌍</span>
+        <h3>Décentralisé</h3>
+        <p>Aucune autorité centrale, vous gardez le contrôle</p>
+      </div>
+    </div>
+  </section>
+</div><div class="property-list-page">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="title-gradient">Location Immobilière</span>
+        <br>sur la Blockchain
+      </h1>
+      <p class="hero-subtitle">
+        Louez et proposez des biens immobiliers en toute sécurité grâce aux smart contracts Ethereum
+      </p>
+      
+      <div class="hero-stats">
+        <div class="stat-card">
+          <span class="stat-icon">🏠</span>
+          <span class="stat-value">{{ properties.length }}</span>
+          <span class="stat-label">Propriétés</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">⟠</span>
+          <span class="stat-value">Sepolia</span>
+          <span class="stat-label">Réseau</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">🔒</span>
+          <span class="stat-value">100%</span>
+          <span class="stat-label">Sécurisé</span>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <button *ngIf="isConnected" class="btn btn-primary btn-lg" (click)="goToListProperty()">
+          ✨ Publier un bien
+        </button>
+        <button class="btn btn-glass btn-lg" (click)="goToMap()">
+          🗺️ Voir la carte
+        </button>
+      </div>
+    </div>
+    
+    <div class="hero-visual">
+      <div class="floating-card card-1">🏡</div>
+      <div class="floating-card card-2">📜</div>
+      <div class="floating-card card-3">⟠</div>
+    </div>
+  </section>
+
+  <!-- Search & Filters Section -->
+  <section class="filters-section">
+    <div class="filters-container">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" 
+               [(ngModel)]="searchTerm" 
+               (input)="applyFilters()"
+               placeholder="Rechercher une propriété..."
+               class="search-input">
+      </div>
+      
+      <div class="filters-row">
+        <div class="filter-group">
+          <label>📍 Localisation</label>
+          <input type="text" 
+                 [(ngModel)]="filterLocation" 
+                 (input)="applyFilters()"
+                 placeholder="Ville..."
+                 class="filter-input">
+        </div>
+        
+        <div class="filter-group">
+          <label>💰 Prix min (ETH)</label>
+          <input type="number" 
+                 [(ngModel)]="filterMinPrice" 
+                 (input)="applyFilters()"
+                 placeholder="0"
+                 step="0.001"
+                 class="filter-input">
+        </div>
+        
+        <div class="filter-group">
+          <label>💰 Prix max (ETH)</label>
+          <input type="number" 
+                 [(ngModel)]="filterMaxPrice" 
+                 (input)="applyFilters()"
+                 placeholder="0"
+                 step="0.001"
+                 class="filter-input">
+        </div>
+        
+        <button class="btn btn-outline" (click)="resetFilters()">
+          🔄 Réinitialiser
+        </button>
+      </div>
+      
+      <div class="results-count">
+        {{ filteredProperties.length }} propriété(s) trouvée(s)
+      </div>
+    </div>
+  </section>
+
+  <!-- Connection Notice -->
+  <div *ngIf="!isConnected" class="connect-banner">
+    <span class="connect-icon">🦊</span>
+    <span>Connectez votre wallet MetaMask pour louer ou publier des propriétés</span>
+  </div>
+
+  <!-- Properties Section -->
+  <section class="properties-section">
+    <div class="section-header">
+      <h2>🏘️ Propriétés Disponibles</h2>
+      <div class="section-actions">
+        <button class="btn btn-secondary" (click)="loadProperties()">
+          🔄 Actualiser
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement des propriétés depuis la blockchain...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredProperties.length === 0 && !loading" class="empty-state">
+      <div class="empty-icon">🏗️</div>
+      <h3>Aucune propriété trouvée</h3>
+      <p *ngIf="searchTerm || filterLocation || filterMinPrice || filterMaxPrice">
+        Essayez de modifier vos critères de recherche
+      </p>
+      <p *ngIf="!searchTerm && !filterLocation && !filterMinPrice && !filterMaxPrice">
+        Soyez le premier à lister une propriété sur la blockchain !
+      </p>
+      <button *ngIf="isConnected && !searchTerm && !filterLocation" class="btn btn-primary btn-lg" (click)="goToListProperty()">
+        ✨ Publier la première propriété
+      </button>
+      <button *ngIf="searchTerm || filterLocation || filterMinPrice || filterMaxPrice" class="btn btn-secondary" (click)="resetFilters()">
+        🔄 Réinitialiser les filtres
+      </button>
+    </div>
+
+    <!-- Properties Grid -->
+    <div *ngIf="filteredProperties.length > 0" class="properties-grid">
+      <div *ngFor="let property of filteredProperties; let i = index" 
            class="property-card animate-fade-in"
            [style.animation-delay]="i * 0.1 + 's'"
            (click)="viewProperty(property.id)">
