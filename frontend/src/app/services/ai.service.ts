@@ -46,7 +46,8 @@ export interface RecommendResponse {
   providedIn: 'root'
 })
 export class AiService {
-  private apiUrl = 'http://35.192.0.248:30081/api/users';
+  private apiUrl = 'http://35.192.0.248:30800';
+
   constructor(private http: HttpClient) {}
 
   predictPrice(data: PriceRequest): Observable<PriceResponse> {
