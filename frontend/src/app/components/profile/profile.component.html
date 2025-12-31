@@ -1,16 +1,65 @@
 <div class="profile">
   <h2>Mon Profil</h2>
-  <div *ngIf="account" class="profile-info">
-    <div class="info-item">
-      <span class="label">Adresse:</span>
-      <span class="value">{{ account }}</span>
+  
+  <div *ngIf="account" class="profile-content">
+    <!-- Wallet Info -->
+    <div class="wallet-section">
+      <div class="info-item">
+        <span class="label">🔗 Adresse Wallet:</span>
+        <span class="value wallet-address">{{ account }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">💰 Balance:</span>
+        <span class="value">{{ balance }} ETH</span>
+      </div>
     </div>
-    <div class="info-item">
-      <span class="label">Balance:</span>
-      <span class="value">{{ balance }} ETH</span>
+
+    <!-- Profile Form -->
+    <div class="profile-form" *ngIf="!loading">
+      <h3>📋 Informations de contact</h3>
+      <p class="form-description">Ces informations seront visibles par les locataires/propriétaires</p>
+
+      <div class="form-group">
+        <label for="username">👤 Nom / Pseudo</label>
+        <input type="text" id="username" [(ngModel)]="user.username" 
+               placeholder="Votre nom ou pseudo">
+      </div>
+
+      <div class="form-group">
+        <label for="email">📧 Email</label>
+        <input type="email" id="email" [(ngModel)]="user.email" 
+               placeholder="votre@email.com">
+      </div>
+
+      <div class="form-group">
+        <label for="phone">📱 Téléphone</label>
+        <input type="tel" id="phone" [(ngModel)]="user.phone" 
+               placeholder="+33 6 12 34 56 78">
+      </div>
+
+      <div class="form-group">
+        <label for="role">🏷️ Rôle principal</label>
+        <select id="role" [(ngModel)]="user.role">
+          <option value="RENTER">Locataire</option>
+          <option value="OWNER">Propriétaire</option>
+        </select>
+      </div>
+
+      <div class="message" *ngIf="message" [ngClass]="messageType">
+        {{ message }}
+      </div>
+
+      <button class="btn btn-primary" (click)="saveProfile()" [disabled]="saving">
+        {{ saving ? '⏳ Sauvegarde...' : '💾 Sauvegarder' }}
+      </button>
+    </div>
+
+    <div class="loading" *ngIf="loading">
+      <p>Chargement du profil...</p>
     </div>
   </div>
+
   <div *ngIf="!account" class="no-account">
-    <p>Veuillez connecter votre wallet pour voir votre profil</p>
+    <p>🔒 Veuillez connecter votre wallet pour voir votre profil</p>
   </div>
 </div>
