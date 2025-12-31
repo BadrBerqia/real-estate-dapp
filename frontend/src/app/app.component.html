@@ -25,23 +25,24 @@
           <span class="nav-icon">📋</span>
           <span>Locations</span>
         </a>
+        <a routerLink="/profile" routerLinkActive="active">
+          <span class="nav-icon">👤</span>
+          <span>Profil</span>
+        </a>
         <a routerLink="/list-property" routerLinkActive="active" class="nav-cta">
           <span class="nav-icon">✨</span>
           <span>Publier</span>
         </a>
       </nav>
-
       <div class="header-actions">
         <app-wallet-connect></app-wallet-connect>
       </div>
     </div>
   </header>
-
   <!-- Main Content -->
   <main class="app-main">
     <router-outlet></router-outlet>
   </main>
-
   <!-- Footer -->
   <footer class="app-footer">
     <div class="container">
