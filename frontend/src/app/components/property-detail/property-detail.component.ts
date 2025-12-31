@@ -118,7 +118,9 @@ export class PropertyDetailComponent implements OnInit {
 
   loadOwnerInfo(walletAddress: string) {
     this.loadingOwner = true;
-    this.userService.getUser(walletAddress).subscribe({
+    // Convertir en minuscules pour la recherche
+    const normalizedAddress = walletAddress.toLowerCase();
+    this.userService.getUser(normalizedAddress).subscribe({
       next: (user) => {
         this.ownerInfo = user;
         this.loadingOwner = false;
