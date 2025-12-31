@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BlockchainService } from '../../services/blockchain.service';
 import { Web3Service } from '../../services/web3.service';
+import { UserService, User } from '../../services/user.service';
 import { Property, RentalAgreement } from '../../models/property.model';
 
 @Component({
@@ -17,6 +18,10 @@ export class PropertyDetailComponent implements OnInit {
   processing = false;
   error = '';
   currentAccount = '';
+
+  // Infos du propriétaire
+  ownerInfo: User | null = null;
+  loadingOwner = false;
 
   // Mode édition
   editMode = false;
@@ -51,7 +56,8 @@ export class PropertyDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private blockchainService: BlockchainService,
-    private web3Service: Web3Service
+    private web3Service: Web3Service,
+    private userService: UserService
   ) {}
 
   async ngOnInit() {
@@ -96,12 +102,32 @@ export class PropertyDetailComponent implements OnInit {
             await this.loadBookings();
           }
         }
+
+        // Charger les infos du propriétaire
+        if (this.property) {
+          this.loadOwnerInfo(this.property.owner);
+        }
+
       } catch (error) {
         console.error('Error loading property:', error);
         this.error = 'Erreur lors du chargement de la propriété';
       }
       this.loading = false;
     }
+  }
+
+  loadOwnerInfo(walletAddress: string) {
+    this.loadingOwner = true;
+    this.userService.getUser(walletAddress).subscribe({
+      next: (user) => {
+        this.ownerInfo = user;
+        this.loadingOwner = false;
+      },
+      error: () => {
+        this.ownerInfo = null;
+        this.loadingOwner = false;
+      }
+    });
   }
 
   async loadBookings() {
@@ -153,34 +179,34 @@ export class PropertyDetailComponent implements OnInit {
 
   // Vérifier si c'est un blocage du propriétaire
   isOwnerBooking(booking: RentalAgreement): boolean {
-    return this.property ? 
+    return this.property ?
       booking.tenant.toLowerCase() === this.property.owner.toLowerCase() : false;
   }
 
   // Vérifier si on peut bloquer des dates
   canBlockDates(): boolean {
-    return !!this.blockData.startDate && 
-           !!this.blockData.endDate && 
+    return !!this.blockData.startDate &&
+           !!this.blockData.endDate &&
            new Date(this.blockData.endDate) > new Date(this.blockData.startDate);
   }
 
   // Bloquer des dates
   async blockDates() {
     if (!this.property || !this.canBlockDates()) return;
-    
+
     this.processingBlock = true;
-    
+
     try {
       const startTimestamp = Math.floor(new Date(this.blockData.startDate).getTime() / 1000);
       const endTimestamp = Math.floor(new Date(this.blockData.endDate).getTime() / 1000);
-      
+
       await this.blockchainService.blockDates(this.property.id, startTimestamp, endTimestamp);
-      
+
       alert('✅ Dates bloquées avec succès !');
       this.blockData = { startDate: '', endDate: '' };
       await this.loadBookings();
       await this.loadProperty();
-      
+
     } catch (error: any) {
       console.error('Erreur blocage:', error);
       alert('❌ Erreur: ' + error.message);
@@ -193,22 +219,22 @@ export class PropertyDetailComponent implements OnInit {
   async cancelBooking(rentalId: number) {
     const booking = this.bookings.find(b => b.id === rentalId);
     const isOwnerBlocking = booking && this.isOwnerBooking(booking);
-    
-    const message = isOwnerBlocking ? 
+
+    const message = isOwnerBlocking ?
       'Voulez-vous débloquer ces dates ?' :
       '⚠️ Voulez-vous annuler cette réservation ?\n\nLe locataire sera remboursé du prix de la location.';
-    
+
     if (!confirm(message)) return;
-    
+
     this.processingCancel = rentalId;
-    
+
     try {
       await this.blockchainService.cancelRental(rentalId);
-      
+
       alert(isOwnerBlocking ? '✅ Dates débloquées !' : '✅ Réservation annulée !');
       await this.loadBookings();
       await this.loadProperty();
-      
+
     } catch (error: any) {
       console.error('Erreur annulation:', error);
       alert('❌ Erreur: ' + error.message);

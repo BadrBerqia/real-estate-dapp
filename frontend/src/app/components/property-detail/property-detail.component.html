@@ -48,6 +48,35 @@
         </div>
       </div>
 
+      <!-- Contact du propriétaire (pour non-propriétaires) -->
+      <div class="owner-contact-section" *ngIf="!isOwner && isConnected">
+        <h3>📞 Contacter le propriétaire</h3>
+        
+        <div *ngIf="loadingOwner" class="loading-owner">
+          <p>Chargement des informations...</p>
+        </div>
+
+        <div *ngIf="!loadingOwner && ownerInfo && (ownerInfo.username || ownerInfo.email || ownerInfo.phone)" class="owner-contact-info">
+          <div class="contact-item" *ngIf="ownerInfo.username">
+            <span class="contact-icon">👤</span>
+            <span class="contact-value">{{ ownerInfo.username }}</span>
+          </div>
+          <div class="contact-item" *ngIf="ownerInfo.email">
+            <span class="contact-icon">📧</span>
+            <a href="mailto:{{ ownerInfo.email }}" class="contact-value contact-link">{{ ownerInfo.email }}</a>
+          </div>
+          <div class="contact-item" *ngIf="ownerInfo.phone">
+            <span class="contact-icon">📱</span>
+            <a href="tel:{{ ownerInfo.phone }}" class="contact-value contact-link">{{ ownerInfo.phone }}</a>
+          </div>
+        </div>
+
+        <div *ngIf="!loadingOwner && (!ownerInfo || (!ownerInfo.username && !ownerInfo.email && !ownerInfo.phone))" class="no-contact-info">
+          <p>😕 Ce propriétaire n'a pas encore renseigné ses coordonnées.</p>
+          <p class="hint">Wallet: {{ formatAddress(property.owner) }}</p>
+        </div>
+      </div>
+
       <!-- ========== VUE PROPRIÉTAIRE ========== -->
       <div *ngIf="isOwner" class="owner-section">
 
@@ -102,24 +131,24 @@
           <div class="block-dates-form">
             <h4>🔒 Bloquer des dates</h4>
             <p class="form-hint">Bloquez des dates pour votre usage personnel</p>
-            
+
             <div class="form-row">
               <div class="form-group">
                 <label>Date début</label>
-                <input type="date" 
-                       [(ngModel)]="blockData.startDate" 
+                <input type="date"
+                       [(ngModel)]="blockData.startDate"
                        [min]="getMinStartDate()"
                        class="form-control">
               </div>
               <div class="form-group">
                 <label>Date fin</label>
-                <input type="date" 
-                       [(ngModel)]="blockData.endDate" 
+                <input type="date"
+                       [(ngModel)]="blockData.endDate"
                        [min]="blockData.startDate || getMinStartDate()"
                        class="form-control">
               </div>
               <div class="form-group form-action">
-                <button class="btn btn-secondary" 
+                <button class="btn btn-secondary"
                         (click)="blockDates()"
                         [disabled]="!canBlockDates() || processingBlock">
                   {{ processingBlock ? '⏳...' : '🔒 Bloquer' }}
@@ -194,7 +223,7 @@
 
               <!-- Bouton annuler pour le propriétaire -->
               <div class="booking-actions" *ngIf="booking.isActive">
-                <button class="btn btn-danger btn-sm" 
+                <button class="btn btn-danger btn-sm"
                         (click)="cancelBooking(booking.id)"
                         [disabled]="processingCancel === booking.id">
                   {{ processingCancel === booking.id ? '⏳...' : '❌ Annuler' }}
