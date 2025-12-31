@@ -33,12 +33,28 @@
       <div class="ai-inputs">
         <div class="form-row">
           <div class="form-group">
-            <label for="surface">Surface (m²)</label>
+            <label for="surface">
+              Surface (m²)
+              <span class="info-tooltip">
+                ℹ️
+                <span class="tooltip-text">
+                  Surface habitable totale de la propriété en mètres carrés.
+                </span>
+              </span>
+            </label>
             <input type="number" id="surface" [(ngModel)]="aiData.surface" 
                    name="surface" min="10" max="500">
           </div>
           <div class="form-group">
-            <label for="rooms">Nombre de pièces</label>
+            <label for="rooms">
+              Nombre de pièces
+              <span class="info-tooltip">
+                ℹ️
+                <span class="tooltip-text">
+                  Nombre total de pièces principales (chambres, salon, bureau).
+                </span>
+              </span>
+            </label>
             <input type="number" id="rooms" [(ngModel)]="aiData.rooms" 
                    name="rooms" min="1" max="20">
           </div>
@@ -46,12 +62,32 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="location_score">Score localisation (1-10)</label>
+            <label for="location_score">
+              Score localisation (1-10)
+              <span class="info-tooltip">
+                ℹ️
+                <span class="tooltip-text">
+                  1-3: Zone isolée, peu de transports<br>
+                  4-5: Quartier basique, quelques commerces<br>
+                  6-7: Bon quartier, transports accessibles<br>
+                  8-9: Quartier prisé, bien desservi<br>
+                  10: Emplacement premium (vue mer, centre historique)
+                </span>
+              </span>
+            </label>
             <input type="number" id="location_score" [(ngModel)]="aiData.location_score" 
                    name="location_score" min="1" max="10" step="0.1">
           </div>
           <div class="form-group">
-            <label for="distance_center">Distance centre-ville (km)</label>
+            <label for="distance_center">
+              Distance centre-ville (km)
+              <span class="info-tooltip">
+                ℹ️
+                <span class="tooltip-text">
+                  Distance approximative entre la propriété et le centre-ville en kilomètres.
+                </span>
+              </span>
+            </label>
             <input type="number" id="distance_center" [(ngModel)]="aiData.distance_center" 
                    name="distance_center" min="0" max="50" step="0.5">
           </div>
@@ -59,7 +95,17 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="season_index">Indice saisonnier</label>
+            <label for="season_index">
+              Indice saisonnier
+              <span class="info-tooltip">
+                ℹ️
+                <span class="tooltip-text">
+                  Basse saison: périodes creuses (hiver)<br>
+                  Moyenne saison: périodes normales<br>
+                  Haute saison: vacances, été, fêtes
+                </span>
+              </span>
+            </label>
             <select id="season_index" [(ngModel)]="aiData.season_index" name="season_index">
               <option [value]="0.8">Basse saison (0.8)</option>
               <option [value]="1.0">Moyenne saison (1.0)</option>
