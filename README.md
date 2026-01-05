@@ -381,6 +381,8 @@ curl -X POST http://35.192.0.248:30800/predict/price \
 
 ### Mes Propriétés (Owner)
 ![My Properties](screenshots/my-properties.png)
+![My Properties](screenshots/mesbiens.png)
+![My Properties](screenshots/mesbiens_bis.png)
 *Tableau de bord propriétaire avec réservations*
 
 ### Pipeline Jenkins
