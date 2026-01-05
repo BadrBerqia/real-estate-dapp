@@ -1,289 +1,481 @@
-# 🏠 Real Estate dApp - Decentralized Rentals
+# 🏠 BlockEstate - Location Immobilière Décentralisée
 
-Application décentralisée de location immobilière sur Ethereum, déployée sur Google Kubernetes Engine (GKE).
+<div align="center">
 
-## 📋 Table des matières
+![BlockEstate Logo](https://img.shields.io/badge/BlockEstate-dApp-blue?style=for-the-badge&logo=ethereum)
+![Ethereum](https://img.shields.io/badge/Ethereum-Sepolia-purple?style=for-the-badge&logo=ethereum)
+![Angular](https://img.shields.io/badge/Angular-15-red?style=for-the-badge&logo=angular)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-green?style=for-the-badge&logo=springboot)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-GKE-blue?style=for-the-badge&logo=kubernetes)
 
-- [Architecture](#architecture)
-- [Services déployés](#services-déployés)
-- [Stack technique](#stack-technique)
-- [Infrastructure](#infrastructure)
-- [CI/CD Pipeline](#cicd-pipeline)
-- [Commandes utiles](#commandes-utiles)
-- [Intégration des composants](#intégration-des-composants)
-- [Monitoring](#monitoring)
-- [Coûts estimés](#coûts-estimés)
+**Application décentralisée de location immobilière basée sur la blockchain Ethereum**
+
+[Démo Live](http://104.197.229.223) • [Smart Contract](https://sepolia.etherscan.io/address/0x70Fdf00E81a6A3C37E8d557dDca47D70D8dc1B7D)
+
+</div>
+
+---
+
+## 📋 Description
+
+BlockEstate est une plateforme de location immobilière décentralisée qui utilise la technologie blockchain pour sécuriser les transactions entre propriétaires et locataires. L'application intègre également un module d'intelligence artificielle pour l'estimation automatique des prix de location.
+
+### Problématique
+
+Les plateformes de location traditionnelles présentent plusieurs défis :
+- Frais d'intermédiaires élevés
+- Manque de transparence dans les transactions
+- Risques de fraude sur les paiements
+- Difficulté à estimer un prix juste
+
+### Solution
+
+BlockEstate résout ces problèmes grâce à :
+- **Smart Contracts** : Transactions automatisées et sécurisées
+- **Blockchain Ethereum** : Transparence et immutabilité des données
+- **IA/ML** : Estimation intelligente des prix de location
+- **Architecture Microservices** : Scalabilité et maintenabilité
+
+---
+
+## 🎯 Fonctionnalités
+
+### Pour les Propriétaires
+- ✅ Publication de biens immobiliers
+- ✅ Estimation IA du prix de location
+- ✅ Gestion des réservations
+- ✅ Blocage de dates (indisponibilité)
+- ✅ Annulation de réservations
+- ✅ Tableau de bord des revenus
+
+### Pour les Locataires
+- ✅ Recherche et filtrage des propriétés
+- ✅ Vue carte interactive (Leaflet)
+- ✅ Réservation avec paiement en ETH
+- ✅ Historique des locations
+- ✅ Contact direct avec le propriétaire
+
+### Fonctionnalités Techniques
+- ✅ Authentification MetaMask
+- ✅ Profil utilisateur (email, téléphone)
+- ✅ Prédiction de prix par ML
+- ✅ CI/CD automatisé (Jenkins)
+- ✅ Déploiement Kubernetes (GKE)
 
 ---
 
 ## 🏗️ Architecture
+
+### Architecture Globale
 ```
-┌─────────────────┐     ┌─────────────────┐
-│    Frontend     │────▶│    Backend      │
-│    (Nginx)      │     │  (Spring Boot)  │
-│ 104.197.229.223 │     │  34.70.204.161  │
-└─────────────────┘     └─────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Smart Contracts │  (À venir)
-│   (Sepolia)     │
-└─────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                              UTILISATEUR                                │
+│                         (Navigateur + MetaMask)                         │
+└─────────────────────────────────┬───────────────────────────────────────┘
+                                  │
+                    ┌─────────────▼─────────────┐
+                    │    Frontend (Angular)     │
+                    │    - UI/UX                │
+                    │    - Web3.js              │
+                    └─────────────┬─────────────┘
+                                  │
+          ┌───────────────────────┼───────────────────────┐
+          │                       │                       │
+          ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Blockchain    │    │  API Gateway    │    │   AI Service    │
+│   (Ethereum)    │    │  (Spring Boot)  │    │   (FastAPI)     │
+│                 │    │                 │    │                 │
+│ - Smart Contract│    │ - Routing       │    │ - Price Model   │
+│ - Transactions  │    │ - Load Balance  │    │ - Risk Model    │
+│ - Immutabilité  │    │                 │    │ - Recommend     │
+└─────────────────┘    └────────┬────────┘    └─────────────────┘
+                                │
+              ┌─────────────────┼─────────────────┐
+              │                 │                 │
+              ▼                 ▼                 ▼
+    ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+    │  User Service   │ │Property Service │ │Service Discovery│
+    │  (Spring Boot)  │ │ (Spring Boot)   │ │    (Eureka)     │
+    │                 │ │                 │ │                 │
+    │ - Profils       │ │ - Métadonnées   │ │ - Registre      │
+    │ - Contacts      │ │ - Photos        │ │ - Health Check  │
+    └────────┬────────┘ └────────┬────────┘ └─────────────────┘
+             │                   │
+             └─────────┬─────────┘
+                       ▼
+              ┌─────────────────┐
+              │   PostgreSQL    │
+              │   (Database)    │
+              └─────────────────┘
+```
+
+### Infrastructure Kubernetes
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    Google Kubernetes Engine                   │
+│                                                              │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌───────────┐ │
+│  │  Frontend  │ │ API Gateway│ │ AI Service │ │  Jenkins  │ │
+│  │   :80      │ │   :8080    │ │   :8000    │ │   :8080   │ │
+│  └────────────┘ └────────────┘ └────────────┘ └───────────┘ │
+│                                                              │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌───────────┐ │
+│  │   User     │ │  Property  │ │  Service   │ │ PostgreSQL│ │
+│  │  Service   │ │  Service   │ │ Discovery  │ │           │ │
+│  │   :8081    │ │   :8082    │ │   :8761    │ │   :5432   │ │
+│  └────────────┘ └────────────┘ └────────────┘ └───────────┘ │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                    Monitoring Stack                      │ │
+│  │         Prometheus + Grafana + AlertManager             │ │
+│  └─────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Pipeline CI/CD
+```
+┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
+│  Push   │───▶│ Jenkins │───▶│  Build  │───▶│  Push   │───▶│ Deploy  │
+│  Code   │    │ Trigger │    │  Maven  │    │  Image  │    │   K8s   │
+│         │    │         │    │  npm    │    │ Kaniko  │    │         │
+└─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘
+     │                                                            │
+     │              GitHub Repository                             │
+     └────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🌐 Services déployés
+## 🛠️ Technologies
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| **Frontend** | http://104.197.229.223 | Interface utilisateur |
-| **Backend** | http://34.70.204.161 | API REST Spring Boot |
-| **Jenkins** | http://136.111.124.86 | CI/CD Pipeline |
-| **Grafana** | http://136.115.174.225 | Dashboards monitoring |
+### Frontend
+| Technologie | Version | Usage |
+|-------------|---------|-------|
+| Angular | 15.x | Framework frontend |
+| TypeScript | 5.x | Langage de programmation |
+| Web3.js | 4.x | Interaction blockchain |
+| Leaflet | 1.9.x | Cartes interactives |
+| TailwindCSS | 3.x | Styling |
 
----
+### Backend
+| Technologie | Version | Usage |
+|-------------|---------|-------|
+| Spring Boot | 3.x | Framework backend |
+| Spring Cloud | 2023.x | Microservices |
+| Netflix Eureka | - | Service Discovery |
+| PostgreSQL | 15 | Base de données |
+| FastAPI | 0.109 | API ML/AI |
 
-## 🛠️ Stack technique
+### Blockchain
+| Technologie | Version | Usage |
+|-------------|---------|-------|
+| Solidity | 0.8.x | Smart Contracts |
+| Ethereum | Sepolia | Réseau de test |
+| MetaMask | - | Wallet |
+| Ethers.js | 6.x | Librairie Web3 |
 
-| Composant | Technologie |
-|-----------|-------------|
-| **Frontend** | HTML/CSS/JS (Angular prévu) |
-| **Backend** | Java 17, Spring Boot, Maven |
-| **Smart Contracts** | Solidity, Hardhat (à venir) |
-| **ML Service** | Python, FastAPI, sklearn (à venir) |
-| **Infrastructure** | Terraform, GCP, GKE |
-| **CI/CD** | Jenkins, Kaniko |
-| **Containerisation** | Docker, Kubernetes |
-| **Monitoring** | Prometheus, Grafana |
-| **Registry** | Google Artifact Registry |
+### DevOps
+| Technologie | Version | Usage |
+|-------------|---------|-------|
+| Kubernetes | 1.28 | Orchestration |
+| Google GKE | - | Cloud Provider |
+| Jenkins | 2.x | CI/CD |
+| Kaniko | - | Build d'images |
+| Docker | 24.x | Conteneurisation |
+| Prometheus | - | Monitoring |
+| Grafana | - | Dashboards |
 
----
-
-## ☁️ Infrastructure
-
-### Cluster GKE
-
-- **Nom** : `jee-cluster`
-- **Zone** : `us-central1-a`
-- **Machine** : `e2-standard-2` (Spot VM)
-- **Disque** : 50 GB
-
-### Terraform
-```bash
-cd infrastructure
-terraform init
-terraform plan
-terraform apply
-```
-
-### Fichiers Terraform
-```
-infrastructure/
-├── main.tf           # Ressources GCP
-├── variables.tf      # Variables
-└── jenkins-key.json  # Service account (gitignored)
-```
+### Intelligence Artificielle
+| Technologie | Version | Usage |
+|-------------|---------|-------|
+| Python | 3.10 | Langage |
+| Scikit-learn | 1.7.2 | Modèles ML |
+| Pandas | 2.2.3 | Data processing |
+| NumPy | 2.2.6 | Calculs numériques |
 
 ---
 
-## 🔄 CI/CD Pipeline
-
-### Workflow
-```
-Push GitHub → Webhook → Jenkins → Build → Push Image → Deploy K8s
-```
-
-### Stages du pipeline
-
-1. **Checkout** - Clone le repo
-2. **Build Backend** - Maven compile
-3. **Push Backend Image** - Kaniko → Artifact Registry
-4. **Build Frontend** - (si package.json existe)
-5. **Push Frontend Image** - Kaniko → Artifact Registry
-6. **Deploy** - kubectl update deployment
-
-### Trigger
-
-Le pipeline se déclenche automatiquement à chaque push sur `main`.
-
----
-
-## 📁 Structure du projet
+## 📦 Structure du Projet
 ```
 real-estate-dapp/
-├── backend/
-│   ├── src/
-│   ├── pom.xml
-│   └── Dockerfile
-├── frontend/
-│   ├── index.html
-│   └── Dockerfile
-├── k8s/
-│   ├── backend.yaml
+├── 📁 backend/
+│   ├── 📁 api-gateway/          # Point d'entrée API
+│   ├── 📁 service-discovery/    # Eureka Server
+│   ├── 📁 user-service/         # Gestion utilisateurs
+│   ├── 📁 property-service/     # Gestion propriétés
+│   └── 📁 ai-service/           # Service ML (FastAPI)
+│       ├── 📁 app/
+│       │   ├── main.py          # API endpoints
+│       │   └── 📁 models/       # Modèles ML (.pkl)
+│       ├── Dockerfile
+│       └── requirements.txt
+│
+├── 📁 frontend/
+│   ├── 📁 src/
+│   │   ├── 📁 app/
+│   │   │   ├── 📁 components/   # Composants Angular
+│   │   │   ├── 📁 services/     # Services (Web3, API)
+│   │   │   └── 📁 models/       # Interfaces TypeScript
+│   │   └── 📁 assets/
+│   ├── angular.json
+│   └── package.json
+│
+├── 📁 contracts/
+│   └── RentalPlatform.sol       # Smart Contract
+│
+├── 📁 k8s/
+│   ├── 📁 backend/              # Manifests microservices
+│   ├── ai-service.yaml
 │   └── frontend.yaml
-├── infrastructure/
-│   ├── main.tf
-│   └── variables.tf
-├── smart-contracts/      # À venir
-├── ml-service/           # À venir
-├── Jenkinsfile
+│
+├── Jenkinsfile                   # Pipeline CI/CD
 └── README.md
 ```
 
 ---
 
-## 🔧 Commandes utiles
+## 🚀 Installation & Déploiement
 
-### Cluster
+### Prérequis
+
+- Node.js 18+
+- Java 17+
+- Python 3.10+
+- Docker
+- kubectl
+- gcloud CLI
+- MetaMask (extension navigateur)
+
+### Installation Locale
+
+#### 1. Cloner le repository
 ```bash
-# Voir les pods
+git clone https://github.com/BadrBerqia/real-estate-dapp.git
+cd real-estate-dapp
+```
+
+#### 2. Backend (Spring Boot)
+```bash
+cd backend/service-discovery
+mvn clean package -DskipTests
+java -jar target/*.jar
+
+# Répéter pour api-gateway, user-service, property-service
+```
+
+#### 3. AI Service (FastAPI)
+```bash
+cd backend/ai-service
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+#### 4. Frontend (Angular)
+```bash
+cd frontend
+npm install
+ng serve
+```
+
+#### 5. Smart Contract
+
+Le contrat est déjà déployé sur Sepolia :
+- **Adresse** : `0x70Fdf00E81a6A3C37E8d557dDca47D70D8dc1B7D`
+- **Etherscan** : [Voir sur Sepolia](https://sepolia.etherscan.io/address/0x70Fdf00E81a6A3C37E8d557dDca47D70D8dc1B7D)
+
+### Déploiement Kubernetes (GKE)
+
+#### 1. Créer le cluster
+```bash
+gcloud container clusters create real-estate-cluster \
+  --zone us-central1-a \
+  --num-nodes 1 \
+  --machine-type e2-medium
+```
+
+#### 2. Déployer les services
+```bash
+kubectl apply -f k8s/backend/
+kubectl apply -f k8s/ai-service.yaml
+kubectl apply -f k8s/frontend.yaml
+```
+
+#### 3. Vérifier le déploiement
+```bash
 kubectl get pods
-
-# Voir les services
 kubectl get services
-
-# Voir les logs d'un pod
-kubectl logs <pod-name>
-
-# Redémarrer un deployment
-kubectl rollout restart deployment <deployment-name>
 ```
 
-### Debug
+---
+
+## 🤖 Module IA/ML
+
+### Modèles Disponibles
+
+| Modèle | Endpoint | Description |
+|--------|----------|-------------|
+| **Price Prediction** | `POST /predict/price` | Estime le prix de location optimal |
+| **Risk Assessment** | `POST /predict/risk` | Évalue le risque d'un locataire |
+| **Recommendation** | `POST /recommend` | Recommande une catégorie de bien |
+
+### Exemple d'utilisation
 ```bash
-# Décrire un pod
-kubectl describe pod <pod-name>
+# Prédiction de prix
+curl -X POST http://35.192.0.248:30800/predict/price \
+  -H "Content-Type: application/json" \
+  -d '{
+    "surface": 75,
+    "rooms": 3,
+    "location_score": 8.0,
+    "distance_center": 5.0,
+    "season_index": 1.0
+  }'
 
-# Exec dans un container
-kubectl exec -it <pod-name> -- sh
-
-# Voir les events
-kubectl get events --sort-by=.metadata.creationTimestamp
+# Réponse
+{
+  "suggested_price": 970.95,
+  "currency": "EUR",
+  "input": {...}
+}
 ```
 
-### Gestion des coûts
-```bash
-# Scale down (arrêter les coûts)
-gcloud container clusters resize jee-cluster --zone us-central1-a --num-nodes=0
+### Features utilisées
 
-# Scale up (reprendre)
-gcloud container clusters resize jee-cluster --zone us-central1-a --num-nodes=1
+| Feature | Description | Range |
+|---------|-------------|-------|
+| `surface` | Surface en m² | 10 - 500 |
+| `rooms` | Nombre de pièces | 1 - 20 |
+| `location_score` | Qualité du quartier | 1 - 10 |
+| `distance_center` | Distance centre-ville (km) | 0 - 50 |
+| `season_index` | Coefficient saisonnier | 0.8 - 1.2 |
+
+---
+
+## 📸 Screenshots
+
+### Page d'Accueil
+![Home](screenshots/home.png)
+*Hero section avec statistiques et accès rapide*
+
+### Liste des Propriétés
+![Properties](screenshots/properties.png)
+*Recherche et filtrage des biens disponibles*
+
+### Vue Carte
+![Map](screenshots/map.png)
+*Visualisation géographique avec prix affichés*
+
+### Détail Propriété
+![Detail](screenshots/detail.png)
+*Informations complètes et formulaire de réservation*
+
+### Estimation IA
+![AI](screenshots/ai-estimation.png)
+*Prédiction intelligente du prix de location*
+
+### Page Profil
+![Profile](screenshots/profile.png)
+*Gestion des informations de contact*
+
+### Mes Propriétés (Owner)
+![My Properties](screenshots/my-properties.png)
+*Tableau de bord propriétaire avec réservations*
+
+### Pipeline Jenkins
+![Jenkins](screenshots/jenkins.png)
+*CI/CD automatisé*
+
+### Monitoring Grafana
+![Grafana](screenshots/grafana.png)
+*Dashboards de monitoring*
+
+---
+
+## 📊 Smart Contract
+
+### Fonctions Principales
+```solidity
+// Publication d'une propriété
+function listProperty(
+    string memory _title,
+    string memory _description,
+    string memory _location,
+    uint256 _pricePerDay,
+    uint256 _deposit
+) external
+
+// Location d'une propriété
+function rentProperty(
+    uint256 _propertyId,
+    uint256 _startDate,
+    uint256 _endDate
+) external payable
+
+// Annulation (propriétaire)
+function cancelRental(uint256 _rentalId) external
+
+// Fin de location + remboursement dépôt
+function completeRental(uint256 _rentalId) external
+```
+
+### Events
+```solidity
+event PropertyListed(uint256 indexed propertyId, address indexed owner);
+event PropertyRented(uint256 indexed propertyId, address indexed tenant);
+event RentalCancelled(uint256 indexed rentalId);
+event RentalCompleted(uint256 indexed rentalId);
 ```
 
 ---
 
-## 🔌 Intégration des composants
+## 🔒 Sécurité
 
-### Frontend Angular
-
-Quand le Frontend Engineer fournit son code :
-
-1. Remplacer le contenu de `frontend/`
-2. Mettre à jour `frontend/Dockerfile` :
-```dockerfile
-FROM node:18-alpine AS build
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build --prod
-
-FROM nginx:alpine
-COPY --from=build /app/dist/[NOM-PROJET] /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-3. Push → Pipeline déploie automatiquement
-
----
-
-### Smart Contracts (Blockchain)
-
-Quand le Blockchain Engineer fournit son code :
-
-1. Ajouter le dossier `smart-contracts/`
-2. Configurer les secrets Jenkins :
-   - `sepolia-private-key` : Clé privée du wallet
-   - `infura-api-key` : Clé API Infura
-
-3. Son `hardhat.config.js` doit utiliser :
-```javascript
-module.exports = {
-  networks: {
-    sepolia: {
-      url: `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`,
-      accounts: [process.env.PRIVATE_KEY]
-    }
-  }
-};
-```
-
----
-
-### ML Service
-
-Quand le ML Engineer fournit son code :
-
-1. Ajouter le dossier `ml-service/`
-2. Créer `ml-service/Dockerfile` :
-```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY app/ ./app/
-EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-3. Créer `k8s/ml-service.yaml`
-4. Mettre à jour le Jenkinsfile
-
----
-
-## 📊 Monitoring
-
-### Grafana
-
-- **URL** : http://136.115.174.225
-- **User** : admin
-- **Password** : 
-```bash
-kubectl get secret monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode
-```
-
-### Dashboards disponibles
-
-- Kubernetes / Compute Resources / Cluster
-- Kubernetes / Compute Resources / Pod
-- Node Exporter / Nodes
-
----
-
-## 💰 Coûts estimés (24/7)
-
-| Ressource | Coût/mois |
-|-----------|-----------|
-| GKE Node (e2-standard-2 Spot) | ~$15 |
-| Load Balancer x3 | ~$54 |
-| Artifact Registry | ~$1 |
-| Network | ~$5 |
-| **Total** | **~$75/mois** |
-
-> 💡 Pour réduire : Scale down le cluster quand non utilisé
+- ✅ Authentification via MetaMask (clé privée jamais exposée)
+- ✅ Smart Contract audité
+- ✅ Transactions signées côté client
+- ✅ CORS configuré sur les APIs
+- ✅ Variables sensibles en secrets Kubernetes
 
 ---
 
 ## 👥 Équipe
 
-| Rôle | Responsabilité |
-|------|----------------|
-| **Cloud/DevOps Engineer** | Infrastructure, CI/CD, Déploiement |
-| **Backend Engineer** | API Spring Boot |
-| **Frontend Engineer** | Interface Angular |
-| **Blockchain Engineer** | Smart Contracts Solidity |
-| **ML Engineer** | Modèles ML, FastAPI |
+| Membre | Rôle | Responsabilités |
+|--------|------|-----------------|
+| **Badr BERQIA** | Cloud/DevOps Lead | Kubernetes, Jenkins, CI/CD, Architecture |
+| **Badr BERQIA** | Frontend/Blockchain | Angular, Web3.js, Smart Contracts |
+| **Issahou** | Frontend/Blockchain | Angular, UI/UX, Intégration |
+| **Ouallali** | Backend | Spring Boot, Microservices, APIs |
+| **Lorraine** | AI/ML | Modèles ML, FastAPI, Data Science |
 
 ---
+
+## 📚 Références
+
+- [Solidity Documentation](https://docs.soliditylang.org/)
+- [Angular Documentation](https://angular.io/docs)
+- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Scikit-learn Documentation](https://scikit-learn.org/)
+
+---
+
+## 📄 Licence
+
+Ce projet est réalisé dans le cadre académique.
+
+**Projet JEE/ML** - Cycle Ingénieur LSI  
+**Professeur** : Pr. AACHAK  
+**Année Universitaire** : 2024-2025  
+**Établissement** : FST Tanger
+
+---
+
+<div align="center">
+
+Made with ❤️ by the BlockEstate Team
+
+🏠 **BlockEstate** - La location immobilière réinventée
+
+</div>

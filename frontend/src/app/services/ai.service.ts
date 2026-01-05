@@ -46,7 +46,7 @@ export interface RecommendResponse {
   providedIn: 'root'
 })
 export class AiService {
-  private apiUrl = 'http://35.192.0.248:30800';
+  private apiUrl = 'http://136.114.46.221:30800';
 
   constructor(private http: HttpClient) {}
 
