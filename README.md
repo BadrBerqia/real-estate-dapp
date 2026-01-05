@@ -319,6 +319,10 @@ kubectl get services
 | **Risk Assessment** | `POST /predict/risk` | Évalue le risque d'un locataire |
 | **Recommendation** | `POST /recommend` | Recommande une catégorie de bien |
 
+### Lien GitHub de l'entrainement du modèle
+
+https://github.com/Lorraine301/Projet-JEE_IA_Role
+
 ### Exemple d'utilisation
 ```bash
 # Prédiction de prix
@@ -446,11 +450,10 @@ event RentalCompleted(uint256 indexed rentalId);
 
 | Membre | Rôle |
 |--------|------|
-| **Badr BERQIA** | Cloud/DevOps Lead |
-| **Badr BERQIA** | Frontend/Backend/Blockchain |
-| **Issahou** | Frontend/Blockchain |
-| **Ouallali** | Backend |
-| **Lorraine** | AI/ML |
+| **Badr BERQIA** | Cloud/DevOps/Frontend/Backend/Blockchain (Lead) |
+| **OUEDRAOGO youssahou** | Frontend/Blockchain |
+| **Mohammed Amine OUALLALI** | Backend |
+| **RAHELIARISOA Andriamasy Lorraine Agnès** | AI/ML |
 
 ---
 
