@@ -284,7 +284,13 @@ Le contrat est déjà déployé sur Sepolia :
 - **Adresse** : `0x70Fdf00E81a6A3C37E8d557dDca47D70D8dc1B7D`
 - **Etherscan** : [Voir sur Sepolia](https://sepolia.etherscan.io/address/0x70Fdf00E81a6A3C37E8d557dDca47D70D8dc1B7D)
 
+#### NOTA BENE!!!
+
+un fichier FRONTEND_INTEGRATION_GUIDE.md est dans le dossier backend qui explique en détails l'intégration front/back!!
+
 ### Déploiement Kubernetes (GKE)
+
+
 
 #### 1. Créer le cluster
 ```bash
