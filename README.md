@@ -368,6 +368,7 @@ curl -X POST http://35.192.0.248:30800/predict/price \
 
 ### Détail Propriété
 ![Detail](screenshots/detail.png)
+![Detail](screenshots/detail_bis.png)
 *Informations complètes et formulaire de réservation*
 
 ### Estimation IA
@@ -441,13 +442,13 @@ event RentalCompleted(uint256 indexed rentalId);
 
 ## 👥 Équipe
 
-| Membre | Rôle | Responsabilités |
-|--------|------|-----------------|
-| **Badr BERQIA** | Cloud/DevOps Lead | Kubernetes, Jenkins, CI/CD, Architecture |
-| **Badr BERQIA** | Frontend/Blockchain | Angular, Web3.js, Smart Contracts |
-| **Issahou** | Frontend/Blockchain | Angular, UI/UX, Intégration |
-| **Ouallali** | Backend | Spring Boot, Microservices, APIs |
-| **Lorraine** | AI/ML | Modèles ML, FastAPI, Data Science |
+| Membre | Rôle |
+|--------|------|
+| **Badr BERQIA** | Cloud/DevOps Lead |
+| **Badr BERQIA** | Frontend/Backend/Blockchain |
+| **Issahou** | Frontend/Blockchain |
+| **Ouallali** | Backend |
+| **Lorraine** | AI/ML |
 
 ---
 
@@ -466,15 +467,13 @@ event RentalCompleted(uint256 indexed rentalId);
 Ce projet est réalisé dans le cadre académique.
 
 **Projet JEE/ML** - Cycle Ingénieur LSI  
-**Professeur** : Pr. AACHAK  
-**Année Universitaire** : 2024-2025  
+**Professeur** : Pr. L. EL AACHAK  
+**Année Universitaire** : 2025-2026  
 **Établissement** : FST Tanger
 
 ---
 
 <div align="center">
-
-Made with ❤️ by the BlockEstate Team
 
 🏠 **BlockEstate** - La location immobilière réinventée
 
