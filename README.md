@@ -290,8 +290,6 @@ un fichier FRONTEND_INTEGRATION_GUIDE.md est dans le dossier backend qui expliqu
 
 ### Déploiement Kubernetes (GKE)
 
-
-
 #### 1. Créer le cluster
 ```bash
 gcloud container clusters create real-estate-cluster \
@@ -313,6 +311,59 @@ kubectl get pods
 kubectl get services
 ```
 
+### Services Kubernetes Déployés
+![Services](screenshots/kubectl-services.png)
+*Liste des services déployés sur le cluster GKE*
+
+---
+
+## ⚠️ Note Importante - IP Dynamique (Spot Nodes)
+
+### Contexte
+
+Ce projet utilise un **Spot Node Pool** sur GKE pour réduire les coûts (~70% d'économies). Les instances Spot peuvent être recréées par Google à tout moment, ce qui **change l'IP externe du nœud**.
+
+Les services **AI Service** et **User Service** utilisent des NodePorts et sont donc affectés par ce changement.
+
+### Services et leurs accès
+
+| Service | Type | URL d'accès | IP Fixe ? |
+|---------|------|-------------|-----------|
+| Frontend | LoadBalancer | http://104.197.229.223 | ✅ Oui |
+| AI Service | NodePort | http://\<NODE_IP\>:30800 | ❌ Non |
+| User Service | NodePort | http://\<NODE_IP\>:30081 | ❌ Non |
+| Jenkins | LoadBalancer | http://136.111.124.86 | ✅ Oui |
+| Grafana | LoadBalancer | http://136.115.174.225 | ✅ Oui |
+
+### Vérifier l'IP actuelle du nœud
+```bash
+kubectl get nodes -o wide
+```
+
+L'IP externe est dans la colonne `EXTERNAL-IP`.
+
+### Si l'estimation IA ou le profil ne fonctionne pas
+
+1. Vérifier la nouvelle IP du nœud :
+```bash
+   kubectl get nodes -o wide
+```
+
+2. Mettre à jour les fichiers frontend :
+   - `frontend/src/app/services/ai.service.ts` → Modifier `apiUrl`
+   - `frontend/src/app/services/user.service.ts` → Modifier `apiUrl`
+
+3. Rebuild et redéployer :
+```bash
+   git add . && git commit -m "fix: update node IP" && git push
+```
+
+### Pourquoi ce choix ?
+
+Pour un projet académique, les **LoadBalancer** pour chaque service auraient coûté trop cher (~$18/mois par service). Les NodePorts sont gratuits mais dépendent de l'IP du nœud.
+
+**Alternative pour la production :** Utiliser un Ingress Controller avec une IP statique.
+
 ---
 
 ## 🤖 Module IA/ML
@@ -330,9 +381,11 @@ kubectl get services
 https://github.com/Lorraine301/Projet-JEE_IA_Role
 
 ### Exemple d'utilisation
+
+> ⚠️ Remplacer `<NODE_IP>` par l'IP actuelle du nœud (voir section "IP Dynamique")
 ```bash
 # Prédiction de prix
-curl -X POST http://35.192.0.248:30800/predict/price \
+curl -X POST http://<NODE_IP>:30800/predict/price \
   -H "Content-Type: application/json" \
   -d '{
     "surface": 75,
